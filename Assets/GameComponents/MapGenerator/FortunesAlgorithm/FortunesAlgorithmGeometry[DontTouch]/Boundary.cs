@@ -7,25 +7,15 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-    public class Boundary : PointSet
+    public abstract class Boundary : PointSet
     {
         protected Site leftSite;
         public Site LeftSite { get { return leftSite; } }
         protected Site rightSite;
         public Site RightSite { get { return rightSite; } }
 
-        public Vertex summit = new Vertex(0,0); //Vertex?
-        public Vertex base_ = new Vertex(0,0); //Vertex?
-
-        public Boundary(Site leftSite, Site rightSite) {
-            if(leftSite.x < rightSite.x) {
-                this.leftSite = leftSite;
-                this.rightSite = rightSite;
-            } else {
-                this.leftSite = rightSite;
-                this.rightSite = leftSite;
-            }
-        }
+        public Vertex summit; //Vertex?
+        public Vertex base_; //Vertex?
 
         // =============================== Intersection
 
@@ -63,7 +53,7 @@ namespace FortunesAlgoritmGeometry
                     x = (c2 - c1)/(m1 - m2);
                     y = (m1*c2 - m2*c1)/(m1 - m2); 
                 }
-                return new Vertex(x, y);
+                return new Vertex(x, y, this, C);
             }
             return null; // They are parallel
         }
@@ -87,16 +77,21 @@ namespace FortunesAlgoritmGeometry
             throw new Exception("No boundary intersection found!");
         }
 
+        protected bool IsOnLine() {
+            return true;
+        }
+
         // ================================== Shortcuts
+
         
-        public Boundary Neg() {
-            return this;
+        public BoundaryNeg Neg() {
+            return this as BoundaryNeg;
         }
-        public Boundary Pos() {
-            return this;
+        public BoundaryPos Pos() {
+            return (BoundaryPos)this;
         }
-        public Boundary Zero() {
-            return this;
+        public BoundaryZero Zero() {
+            return (BoundaryZero)this;
         }
         public UnsetBorderInit CreateUnsetBorder() {
             if(base_ == null || summit == null) throw new Exception("Base/Summit not set!");
@@ -104,13 +99,30 @@ namespace FortunesAlgoritmGeometry
         }
     }
 
-    public abstract class BoundaryNeg : Boundary { // = the left downward curve 
-        public BoundaryNeg(Site left, Site right) : base(left, right) {}
+    public class BoundaryBase : Boundary {
+        public BoundaryBase(Site leftSite, Site rightSite) {
+            if(leftSite.x < rightSite.x) {
+                this.leftSite = leftSite;
+                this.rightSite = rightSite;
+            } else {
+                this.leftSite = rightSite;
+                this.rightSite = leftSite;
+            }
+
+            summit = new Vertex(0,0, this, this);
+            base_ = new Vertex(0,0, this, this);
+        }
+    } 
+    public class BoundaryNeg : Boundary { // = the left downward curve
+
+        protected new bool IsOnLine() {
+            return true;
+        }
     }
-    public abstract class BoundaryPos : Boundary {  // = the right upward curve
-        public BoundaryPos(Site left, Site right) : base(left, right) {}
+    public class BoundaryPos : Boundary {  // = the right upward curve
+ 
     }
-    public abstract class BoundaryZero : Boundary { // = a straight upward line
-        public BoundaryZero(Site left, Site right) : base(left, right) {}
+    public class BoundaryZero : Boundary { // = a straight upward line
+
     }
 }

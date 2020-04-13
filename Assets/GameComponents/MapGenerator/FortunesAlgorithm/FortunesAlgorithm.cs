@@ -4,7 +4,7 @@ using System.Linq;
 using FortunesAlgoritmGeometry;
 using UnityEngine;
 
-// #nullable enable // Unity doesnt like this
+//#nullable enable // Unity doesnt like this
 
 public class FortunesAlgorithm {
     private List<Boundary> V;
@@ -29,7 +29,7 @@ public class FortunesAlgorithm {
     private void FortunesPlaneSweepingAlgorithm(List<Site> S) {
         List<Site> initialSites = InitialSites(S);
         List<Point> Q = InitialQ(initialSites, S);
-        List<PointSet> T = InitialT(initialSites, S);
+        List<PointSet> T = InitialT(initialSites);
 
         while(Q.Any()) {
             Point p = DeleteMin(Q);
@@ -52,43 +52,41 @@ public class FortunesAlgorithm {
     private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
         Region Rq;
         int index;
+        Boundary Crq; // Can stay null //Boundary?
+        Boundary Cqs; // Can stay null //Boundary?
 
-        Boundary Crq = null; // Can stay null //Boundary?
-        Boundary Cqs = null; // Can stay null //Boundary?
-
-        (Rq, index) = FindRegion(p, T, Crq, Cqs);
+        (Rq, index, Crq, Cqs) = FindRegion(p, T);
         Site q = Rq.site;
 
-        Boundary Cpq = new Boundary(p, q);
+        Boundary Cpq = new BoundaryBase(p, q);
 
         List<PointSet> additionT = new List<PointSet>(){
             Cpq.Neg(), new Region(p), Cpq.Pos(), Rq};
-        T.InsertRange(index, additionT);
+        T.InsertRange(index+1, additionT);
 
-        if(Crq != null && Cqs != null) {
-            Debug.Log("Hello!");
-            Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point));
-            AddIfNotNull(Q, Crq.Intersection(Cqs.Neg()));
-            AddIfNotNull(Q, Crq.Pos().Intersection(Cqs));
-        }
+        if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
+        if(Crq != null) { AddIfNotNull(Q, Crq.Intersection(Cpq.Neg())); }
+        if(Cqs != null) { AddIfNotNull(Q, Cpq.Pos().Intersection(Cqs)); }
     }
 
-    private (Region, int) FindRegion(Site p, List<PointSet> T, Boundary Crq, Boundary Cqs) { //Boundary? Crq, Boundary? Cqs
+    private (Region, int, Boundary, Boundary) FindRegion(Site p, List<PointSet> T) { //Boundary? Crq, Boundary? Cqs
         Region Rq = Region.InRegion(T.OfType<Region>().ToList(), p);
+        Boundary Crq = null; // Can stay null //Boundary?
+        Boundary Cqs = null; // Can stay null //Boundary?
 
         int index = T.IndexOf(Rq);
         if(index > 0) {
-            if(T[index-1].GetType()==typeof(Boundary)) {
+            if(typeof(Boundary).IsInstanceOfType(T[index-1])) {
                 Crq = (Boundary)T[index-1]; 
             }
         }
         if(index < T.Count - 1) {
-            if(T[index+1].GetType()==typeof(Boundary)) {
+            if(typeof(Boundary).IsInstanceOfType(T[index+1])) {
                 Cqs = (Boundary)T[index+1]; 
             }
         }
 
-        return (Rq, index);
+        return (Rq, index, Crq, Cqs);
     }
 
     // ================================== Circle Event
@@ -101,11 +99,11 @@ public class FortunesAlgorithm {
         Boundary Cuq = null; // Can stay null //Boundary?
         Boundary Csv = null; // Can stay null //Boundary?
 
-        (Cqr, Crs, index) = FindIntersection(p, T, Cuq, Csv);
+        (Cqr, Crs, index, Cuq, Csv) = FindIntersection(p, T);
         Site q = Cqr.LeftSite;
         Site s = Crs.RightSite;
         
-        Boundary Cqs = new Boundary(q, s);
+        Boundary Cqs = new BoundaryBase(q, s);
         if(q.y < s.y) { Cqs = Cqs.Neg(); }
         else if(q.y > s.y) { Cqs = Cqs.Pos(); }
         else { Cqs = Cqs.Zero(); }
@@ -123,14 +121,18 @@ public class FortunesAlgorithm {
         CloseVertex(p, Cqr, Crs, Cqs);
     }
 
-    private (Boundary, Boundary, int) FindIntersection(Vertex p, List<PointSet> T, Boundary Cuq, Boundary Csv) { //Boundary? Cuq, Boundary? Csv
-        (Boundary Cqr, Boundary Crs) = Boundary.IntersectionOf(T.OfType<Boundary>().ToList(), p);
+    private (Boundary, Boundary, int, Boundary, Boundary) FindIntersection(Vertex p, List<PointSet> T) { //Boundary? Cuq, Boundary? Csv
+        Boundary Cqr = p.LeftBoundary;
+        Boundary Crs = p.RightBoundary;
+        Boundary Cuq = null; // Can stay null //Boundary?
+        Boundary Csv = null; // Can stay null //Boundary?
 
         int index = T.IndexOf(Crs);
-        if(index > 3) { Cuq = (Boundary)T[index-4]; }
-        if(index < T.Count - 2) { Csv = (Boundary)T[index+2]; }
+        if(index == -1) throw new Exception("Border not found!");
+        if(index > 3) { Cuq = T[index-4] as Boundary; }
+        if(index < T.Count - 2) { Csv = T[index+2] as Boundary; }
 
-        return (Cqr, Crs, index);
+        return (Cqr, Crs, index, Cuq, Csv);
     }
 
     private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
@@ -165,12 +167,12 @@ public class FortunesAlgorithm {
         return (S.Except(initialSites)).Cast<Point>().ToList();
     }
 
-    private static List<PointSet> InitialT(List<Site> initialSites, List<Site> S) {
+    private static List<PointSet> InitialT(List<Site> initialSites) {
         List<PointSet> T = new List<PointSet>();
         T.Add(new Region(initialSites[0]));
 
         for(int i = 1; i < initialSites.Count; i++) {
-            T.Add(new Boundary(initialSites[i-1],initialSites[i]).Zero()); 
+            T.Add(new BoundaryBase(initialSites[i-1],initialSites[i]).Zero()); 
             T.Add(new Region(initialSites[i]));
         }
 
@@ -179,16 +181,18 @@ public class FortunesAlgorithm {
 
     // ==================================== Helper Functions (use these before you want result)
 
-    public void RemoveShortBoundaries(float minLenght) { // TODO not urgent
+    public FortunesAlgorithm RemoveShortBoundaries(float minLenght) { // TODO not urgent
         foreach(Boundary C in V){
             //if(C.base_.Dist(C.summit) < minLenght) {
                 //V.Remove(C);
             //}
         }
+        return this;
     }
 
-    public void MakeBoundariesWiggely() {
+    public FortunesAlgorithm MakeBoundariesWiggely() {
         // Minkowski Distance
+        return this;
     }
 
     // ==================================== Get Function
@@ -242,8 +246,8 @@ public class FortunesAlgorithm {
 //         create new boundary rays C(-)(p,q) and C(+)(p,q) with bases p
 //         replace ∗(R(q)) with ∗(R(q)), C(-)(p,q), ∗(R(p)), C(+)(p,q), ∗(R(q)) in T
 //         delete from Q any intersection between C(r,q) and C(q,s)
-//         insert into Q any intersection between C(r,q) and C(-)(q,s)
-//         insert into Q any intersection between C(+)(r,q) and C(q,s)
+//         insert into Q any intersection between C(r,q) and C(-)(p,q)
+//         insert into Q any intersection between C(+)(p,q) and C(q,s)
 //     p is a Voronoi vertex in *(V):
 //         let p be the intersection of C(q,r) on the left and C(r,s) on the right
 //         let C(u,q) be the left neighbor of C(q,r) and

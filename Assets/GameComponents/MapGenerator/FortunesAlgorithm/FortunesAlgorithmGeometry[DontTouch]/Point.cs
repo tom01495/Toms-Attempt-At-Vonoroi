@@ -25,7 +25,15 @@ namespace FortunesAlgoritmGeometry
     }
 
     public class Vertex : Point {
-        public Vertex(float x, float y) : base(x, y) {}
+        private Boundary leftBoundary;
+        public Boundary LeftBoundary { get { return leftBoundary; } }
+        private Boundary rightBoundary;
+        public Boundary RightBoundary { get { return rightBoundary; } }
+
+        public Vertex(float x, float y, Boundary leftBoundary, Boundary rightBoundary) : base(x, y) {
+            this.leftBoundary = leftBoundary;
+            this.rightBoundary = rightBoundary;
+        }
     }
 
     public class Site : Point {
