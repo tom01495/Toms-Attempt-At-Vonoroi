@@ -9,6 +9,7 @@ using UnityEngine;
 public class FortunesAlgorithm {
     private List<Boundary> V;
     private List<Region> A;
+    private Rect bounds;
 
     // TODO fix this (but maybe see if you can do this later)
     //private Dictionary<Coordinates, Coordinates> neighbouringBorders = new Dictionary<Coordinates, Coordinates>();
@@ -17,11 +18,15 @@ public class FortunesAlgorithm {
     public FortunesAlgorithm(List<Coordinates> siteCoordinates, Rect bounds) {
         V = new List<Boundary>();
         A = new List<Region>();
+        this.bounds = bounds;
 
         List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
 
-        // Start Algorithm
+        FortunesPlaneSweepingAlgorithm(S);
+    }
+
+    private void FortunesPlaneSweepingAlgorithm(List<Site> S) {
         List<Site> initialSites = InitialSites(S);
         List<Point> Q = InitialQ(initialSites, S);
         List<PointSet> T = InitialT(initialSites, S);
@@ -30,10 +35,10 @@ public class FortunesAlgorithm {
             Point p = DeleteMin(Q);
 
             if(p.GetType()==typeof(Site)) { 
-                SiteEvent((Site)p, Q, T, bounds); 
+                SiteEvent((Site)p, Q, T); 
             }
             else if(p.GetType()==typeof(Vertex)) { 
-                CircleEvent((Vertex)p, Q, T, bounds);
+                CircleEvent((Vertex)p, Q, T);
             }
         }
 
@@ -44,9 +49,7 @@ public class FortunesAlgorithm {
 
     // ================================== Site Event
 
-    // BOUNDARYS = STRAIGHT EDGES, REGION = CURVED PARABOLA
-
-    private void SiteEvent(Site p, List<Point> Q, List<PointSet> T, Rect bounds) {
+    private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
         Region Rq;
         int index;
 
@@ -56,7 +59,7 @@ public class FortunesAlgorithm {
         (Rq, index) = FindRegion(p, T, Crq, Cqs);
         Site q = Rq.site;
 
-        Boundary Cpq = new Boundary(p, q); // The new boundary
+        Boundary Cpq = new Boundary(p, q);
 
         List<PointSet> additionT = new List<PointSet>(){
             Cpq.Neg(), new Region(p), Cpq.Pos(), Rq};
@@ -90,7 +93,7 @@ public class FortunesAlgorithm {
 
     // ================================== Circle Event
 
-    private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T, Rect bounds) {
+    private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T) {
         Boundary Cqr;
         Boundary Crs;
         int index;
@@ -102,7 +105,7 @@ public class FortunesAlgorithm {
         Site q = Cqr.LeftSite;
         Site s = Crs.RightSite;
         
-        Boundary Cqs = new Boundary(q, s); // The new Boundary
+        Boundary Cqs = new Boundary(q, s);
         if(q.y < s.y) { Cqs = Cqs.Neg(); }
         else if(q.y > s.y) { Cqs = Cqs.Pos(); }
         else { Cqs = Cqs.Zero(); }

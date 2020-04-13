@@ -5,11 +5,11 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-    public class Point : Coordinates, IComparable<Point> // Abstact and free points in R2
+    public class Point : Coordinates, IComparable<Point>
     {
         public Point(float x, float y) : base(x, y) {}
 
-        public float Dist(Point p) { // Euclidean distance to p
+        public float Dist(Point p) {
             return (float)Math.Sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y));
         }
 
@@ -24,11 +24,11 @@ namespace FortunesAlgoritmGeometry
         }
     }
 
-    public class Vertex : Point { // A vonoroi vertex lies between 3 sites
+    public class Vertex : Point {
         public Vertex(float x, float y) : base(x, y) {}
     }
 
-    public class Site : Point { // A site is a predetermined point in R2
+    public class Site : Point {
         public Site(float x, float y) : base(x, y) {}
     }
 }

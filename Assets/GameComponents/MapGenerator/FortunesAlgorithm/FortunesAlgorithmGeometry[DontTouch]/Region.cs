@@ -4,7 +4,7 @@ using System.Collections.Generic;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-    public interface PointSet {}    // A set of infinite points. This can either be a line, area, etc.
+    public interface PointSet {} 
     public class Region : PointSet { // TODO Make sure these can be transformed to tiles!
         public Site site;
 
@@ -34,10 +34,3 @@ namespace FortunesAlgoritmGeometry
         }
     }
 }
-
-// public bool Includes(Point p) {
-//     float angle = (float)(Math.Tanh((p.x - site.x) / (p.y - site.y))); // the downward angle
-//     float distance = (p.Dist(site)/2) / (float)Math.Cos(angle); // the distance between p and the site
-//     //return (new Point(p.x, new_y)).ClosestSite() == p; // TODO
-//     throw new Exception();
-// }

@@ -114,14 +114,3 @@ namespace FortunesAlgoritmGeometry
         public BoundaryZero(Site left, Site right) : base(left, right) {}
     }
 }
-
-// This is the condition for it to be on the boundary
-// public bool Includes(Point p) {
-//     Point s = new Point(p.x, p.y - halfDistance);
-//     return s.Dist(leftSite) == s.Dist(rightSite);
-// }
-
-// protected Site FocusPoint() {
-//     if(leftSite.CompareTo(rightSite) == 1) return leftSite;
-//     else return rightSite;
-// }
