@@ -7,98 +7,70 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-    public class Boundary : PointSet{
-        protected class BoundaryBase
-        {
-            public Site leftSite;
-            public Site rightSite;
+    public class Boundary : PointSet {
+        public Site LeftSite { get { return model.leftSite; } }
+        public Site RightSite { get { return model.rightSite; } }
+        public Vertex summit { get { return model.summit; } set { model.summit = value; } }
+        public Vertex base_ { get { return model.base_; } set { model.base_ = value; } }
 
-            public Vertex summit; //Vertex?
-            public Vertex base_; //Vertex?
+        protected BoundaryModel model;
 
-            public BoundaryBase(Site leftSite, Site rightSite) {
-                if(leftSite.x < rightSite.x) {
-                    this.leftSite = leftSite;
-                    this.rightSite = rightSite;
+
+        // =============================== Constructors
+
+        public Boundary(Site leftSite, Site rightSite) {
+            this.model = new BoundaryModel(leftSite, rightSite);
+        }
+        protected Boundary(Boundary b) { this.model = b.model; }
+        protected Boundary(BoundaryModel b) { this.model = b; }
+        
+
+        // =============================== Intersection
+
+        public Vertex Intersection(Boundary C) { //Vertex? // TODO need to keep an eye out for neg/pos
+            BoundaryModel model2 = C.model;
+
+            float divY1 = model.leftSite.y - model.rightSite.y;
+            float divY2 = model2.leftSite.y - model2.rightSite.y;
+            bool line1isStraight = Mathf.Approximately(divY1,0);
+            bool line2isStraight = Mathf.Approximately(divY2,0);
+
+            // Step 1: Calculating the lines (for y = m*x + c)
+            float m1 = -1;
+            float c1 = -1;
+            if(!line1isStraight) {
+                m1 = -(model.leftSite.x - model.rightSite.x)/divY1;
+                c1 = model.leftSite.y - m1*model.rightSite.x;
+            }
+            float m2 = -1;
+            float c2 = -1;
+            if(!line2isStraight) {
+                m2 = -(model2.leftSite.x - model2.rightSite.x)/divY2;
+                c2 = model2.leftSite.y - m2*model2.rightSite.x;
+            }
+
+            // Step 2: Intersection of the two lines
+            if(!Mathf.Approximately(m1,m2)) {
+                float x = -1;
+                float y = -1;
+                if(line1isStraight) {
+                    x = model.leftSite.x;
+                    y = m2*model.leftSite.x + c2;
+                } else if (line2isStraight) {
+                    x = model2.leftSite.x;
+                    y = m1*model2.leftSite.x + c1;
                 } else {
-                    this.leftSite = rightSite;
-                    this.rightSite = leftSite;
+                    x = (c2 - c1)/(m1 - m2);
+                    y = (m1*c2 - m2*c1)/(m1 - m2);
                 }
 
-                this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this));
-                this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this));
-
+                Vertex v = new Vertex(x, y, new Boundary(this), new Boundary(model2));
+                return IsOnLine(v)? v : null;
             }
-
-            // =============================== Intersection
-
-            public Vertex Intersection(BoundaryBase C) { //Vertex? // TODO need to keep an eye out for neg/pos
-                float divY1 = leftSite.y - rightSite.y;
-                float divY2 = C.leftSite.y - C.rightSite.y;
-                bool line1isStraight = Mathf.Approximately(divY1,0);
-                bool line2isStraight = Mathf.Approximately(divY2,0);
-
-                // Step 1: Calculating the lines (for y = m*x + c)
-                float m1 = -1;
-                float c1 = -1;
-                if(!line1isStraight) {
-                    m1 = -(leftSite.x - rightSite.x)/divY1;
-                    c1 = leftSite.y - m1*rightSite.x;
-                }
-                float m2 = -1;
-                float c2 = -1;
-                if(!line2isStraight) {
-                    m2 = -(C.leftSite.x - C.rightSite.x)/divY2;
-                    c2 = C.leftSite.y - m2*C.rightSite.x;
-                }
-
-                // Step 2: Intersection of the two lines
-                if(!Mathf.Approximately(m1,m2)) {
-                    float x = -1;
-                    float y = -1;
-                    if(line1isStraight) {
-                        x = leftSite.x;
-                        y = m2*leftSite.x + c2;
-                    } else if (line2isStraight) {
-                        x = C.leftSite.x;
-                        y = m1*C.leftSite.x + c1;
-                    } else {
-                        x = (c2 - c1)/(m1 - m2);
-                        y = (m1*c2 - m2*c1)/(m1 - m2);
-                    }
-                    return new Vertex(x, y, new Boundary(this), new Boundary(C));
-                }
-                return null; // They are parallel
-            }
-
+            return null; // They are parallel
         }
 
-        protected BoundaryBase baseclass;
-
-        // Constructors
-        public Boundary(Site leftSite, Site rightSite){
-            this.baseclass = new BoundaryBase(leftSite, rightSite);
-        }
-        protected Boundary(Boundary b){ this.baseclass = b.baseclass; }
-        protected Boundary(BoundaryBase b){ this.baseclass = b; }
-
-        //Base access
-        public Site LeftSite { get { return baseclass.leftSite; } }
-        public Site RightSite { get { return baseclass.rightSite; } }
-        public Vertex summit { get { return baseclass.summit; } set { baseclass.summit = value;}} //Vertex?
-        public Vertex base_ { get { return baseclass.base_; } set { baseclass.base_ = value;}} //Vertex?
-
-        //conversion
-        public BoundaryNeg Neg() => new BoundaryNeg(this);
-        public BoundaryPos Pos() => new BoundaryPos(this);
-        public BoundaryZero Zero() => new BoundaryZero(this);
-
-        //Public Methods
-        public Vertex Intersection(Boundary C){
-            Vertex v = baseclass.Intersection(C.baseclass);
-            if(v == null) return null;
-            return IsOnLine(v)? v : null;
-        }
+        protected new bool IsOnLine(Point p) => true;
 
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
             if(p.GetType()==typeof(Vertex)) {
@@ -117,16 +89,38 @@ namespace FortunesAlgoritmGeometry
                 }
             }
             throw new Exception("No boundary intersection found!");
-        }
+        } 
 
-        // ================================== Shortcuts
+        // =============================== Conversion
 
         public UnsetBorderInit CreateUnsetBorder() {
             if(base_ == null || summit == null) throw new Exception("Base/Summit not set!");
             return new UnsetBorderInit(LeftSite, RightSite, base_, summit);
         }
+        public BoundaryNeg Neg() => new BoundaryNeg(this);
+        public BoundaryPos Pos() => new BoundaryPos(this);
+        public BoundaryZero Zero() => new BoundaryZero(this);
 
-        protected new bool IsOnLine(Point p) => true ;
+
+        protected class BoundaryModel {
+            public Site leftSite;
+            public Site rightSite;
+            public Vertex summit; //Vertex?
+            public Vertex base_; //Vertex?
+
+            public BoundaryModel(Site leftSite, Site rightSite) {
+                if(leftSite.x < rightSite.x) {
+                    this.leftSite = leftSite;
+                    this.rightSite = rightSite;
+                } else {
+                    this.leftSite = rightSite;
+                    this.rightSite = leftSite;
+                }
+
+                this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this)); // TODO remove these 2 whole lines once the code works
+                this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this)); // (needs to be null by default)
+            }
+        }
     }
 
     public class BoundaryNeg : Boundary { // = the left downward curve
