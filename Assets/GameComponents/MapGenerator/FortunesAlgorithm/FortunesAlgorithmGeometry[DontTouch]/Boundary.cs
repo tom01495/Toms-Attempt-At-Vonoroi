@@ -7,7 +7,7 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-    public class Boundary : PointSet // TODO wait so maybe these are straight lines after all?
+    public class Boundary : PointSet
     {
         protected Site leftSite;
         public Site LeftSite { get { return leftSite; } }
@@ -35,7 +35,7 @@ namespace FortunesAlgoritmGeometry
             bool line1isStraight = Mathf.Approximately(divY1,0);
             bool line2isStraight = Mathf.Approximately(divY2,0);
 
-            // calculating the lines (for y = m*x + c)
+            // Step 1: Calculating the lines (for y = m*x + c)
             float m1 = -1;
             float c1 = -1;
             if(!line1isStraight) {
@@ -49,7 +49,7 @@ namespace FortunesAlgoritmGeometry
                 c2 = C.leftSite.y - m2*C.rightSite.x;
             }
 
-            // intersection of the two lines
+            // Step 2: Intersection of the two lines
             if(!Mathf.Approximately(m1,m2)) {
                 float x = -1;
                 float y = -1;
