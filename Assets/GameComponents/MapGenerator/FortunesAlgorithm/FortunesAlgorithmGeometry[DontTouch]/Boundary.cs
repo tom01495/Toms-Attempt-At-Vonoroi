@@ -7,8 +7,8 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-public class Boundary : PointSet{
-    protected class BoundaryBase
+    public class Boundary : PointSet{
+        protected class BoundaryBase
         {
             public Site leftSite;
             public Site rightSite;
@@ -78,9 +78,7 @@ public class Boundary : PointSet{
         // Constructors
         public Boundary(Site leftSite, Site rightSite){
             this.baseclass = new BoundaryBase(leftSite, rightSite);
-
         }
-
         protected Boundary(Boundary b){ this.baseclass = b.baseclass; }
         protected Boundary(BoundaryBase b){ this.baseclass = b; }
 
