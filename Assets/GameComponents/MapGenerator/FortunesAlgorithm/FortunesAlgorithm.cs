@@ -34,10 +34,10 @@ public class FortunesAlgorithm {
         while(Q.Any()) {
             Point p = DeleteMin(Q);
 
-            if(p.GetType()==typeof(Site)) { 
-                SiteEvent((Site)p, Q, T); 
+            if(p.GetType()==typeof(Site)) {
+                SiteEvent((Site)p, Q, T);
             }
-            else if(p.GetType()==typeof(Vertex)) { 
+            else if(p.GetType()==typeof(Vertex)) {
                 CircleEvent((Vertex)p, Q, T);
             }
         }
@@ -58,7 +58,7 @@ public class FortunesAlgorithm {
         (Rq, index, Crq, Cqs) = FindRegion(p, T);
         Site q = Rq.site;
 
-        Boundary Cpq = new BoundaryBase(p, q);
+        Boundary Cpq = new Boundary(p, q);
 
         List<PointSet> additionT = new List<PointSet>(){
             Cpq.Neg(), new Region(p), Cpq.Pos(), Rq};
@@ -77,12 +77,12 @@ public class FortunesAlgorithm {
         int index = T.IndexOf(Rq);
         if(index > 0) {
             if(typeof(Boundary).IsInstanceOfType(T[index-1])) {
-                Crq = (Boundary)T[index-1]; 
+                Crq = (Boundary)T[index-1];
             }
         }
         if(index < T.Count - 1) {
             if(typeof(Boundary).IsInstanceOfType(T[index+1])) {
-                Cqs = (Boundary)T[index+1]; 
+                Cqs = (Boundary)T[index+1];
             }
         }
 
@@ -102,8 +102,8 @@ public class FortunesAlgorithm {
         (Cqr, Crs, index, Cuq, Csv) = FindIntersection(p, T);
         Site q = Cqr.LeftSite;
         Site s = Crs.RightSite;
-        
-        Boundary Cqs = new BoundaryBase(q, s);
+
+        Boundary Cqs = new Boundary(q, s);
         if(q.y < s.y) { Cqs = Cqs.Neg(); }
         else if(q.y > s.y) { Cqs = Cqs.Pos(); }
         else { Cqs = Cqs.Zero(); }
@@ -172,7 +172,7 @@ public class FortunesAlgorithm {
         T.Add(new Region(initialSites[0]));
 
         for(int i = 1; i < initialSites.Count; i++) {
-            T.Add(new BoundaryBase(initialSites[i-1],initialSites[i]).Zero()); 
+            T.Add(new Boundary(initialSites[i-1],initialSites[i]).Zero());
             T.Add(new Region(initialSites[i]));
         }
 
@@ -256,7 +256,7 @@ public class FortunesAlgorithm {
 //           or create C(+)(q,s) if p is right of the higher of q and s,
 //           otherwise create C(-)(q,s)
 //         replace C(q,r), ∗(R,r), C(r,s) with newly created C(q,s) in T
-//         delete from Q any intersection between C(u,q) and C(q,r) 
+//         delete from Q any intersection between C(u,q) and C(q,r)
 //         delete from Q any intersection between C(r,s) and C(s,v)
 //         insert into Q any intersection between C(u,q) and C(q,s)
 //         insert into Q any intersection between C(q,s) and C(s,v)
@@ -267,7 +267,7 @@ public class FortunesAlgorithm {
 
 // output the remaining boundary rays in T
 
-// https://en.wikipedia.org/wiki/Fortune's_algorithm 
+// https://en.wikipedia.org/wiki/Fortune's_algorithm
 
 
 // add a site event in the event queue for each site
