@@ -7,7 +7,8 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
-    public class BoundaryBase
+public class Boundary : PointSet{
+    protected class BoundaryBase
         {
             public Site leftSite;
             public Site rightSite;
@@ -24,8 +25,9 @@ namespace FortunesAlgoritmGeometry
                     this.rightSite = leftSite;
                 }
 
-                summit = new Vertex(0,0, this, this);
-                base_ = new Vertex(0,0, this, this);
+                this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this));
+                this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this));
+
             }
 
             // =============================== Intersection
@@ -64,22 +66,23 @@ namespace FortunesAlgoritmGeometry
                         x = (c2 - c1)/(m1 - m2);
                         y = (m1*c2 - m2*c1)/(m1 - m2);
                     }
-                    return new Vertex(x, y, this, C);
+                    return new Vertex(x, y, new Boundary(this), new Boundary(C));
                 }
                 return null; // They are parallel
             }
 
         }
 
-
-    public class Boundary : PointSet{
         protected BoundaryBase baseclass;
 
         // Constructors
         public Boundary(Site leftSite, Site rightSite){
             this.baseclass = new BoundaryBase(leftSite, rightSite);
+
         }
-        public Boundary(BoundaryBase b){ this.baseclass = b; }
+
+        protected Boundary(Boundary b){ this.baseclass = b.baseclass; }
+        protected Boundary(BoundaryBase b){ this.baseclass = b; }
 
         //Base access
         public Site LeftSite { get { return baseclass.leftSite; } }
@@ -91,17 +94,15 @@ namespace FortunesAlgoritmGeometry
         public BoundaryNeg Neg() => new BoundaryNeg(this);
         public BoundaryPos Pos() => new BoundaryPos(this);
         public BoundaryZero Zero() => new BoundaryZero(this);
-        public static implicit operator BoundaryBase(Boundary b) => b.baseclass;
-        public static implicit operator Boundary(BoundaryBase b) => new Boundary(b);
 
         //Public Methods
-        public Vertex Intersection(BoundaryBase C){
-            Vertex v = baseclass.Intersection(C);
+        public Vertex Intersection(Boundary C){
+            Vertex v = baseclass.Intersection(C.baseclass);
             if(v == null) return null;
             return IsOnLine(v)? v : null;
         }
 
-        public static bool IsIntersection(BoundaryBase C1, BoundaryBase C2, Point p) {
+        public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
             if(p.GetType()==typeof(Vertex)) {
                 Vertex inter = C1.Intersection(C2); //Vertex?
                 if(inter != null) {
@@ -111,7 +112,7 @@ namespace FortunesAlgoritmGeometry
             return false;
         }
 
-        public static (BoundaryBase, BoundaryBase) IntersectionOf(List<BoundaryBase> boundaries, Vertex p) {
+        public static (Boundary, Boundary) IntersectionOf(List<Boundary> boundaries, Vertex p) {
             for(int i = 1; i < boundaries.Count; i++) {
                 if(IsIntersection(boundaries[i-1], boundaries[i], p)) {
                     return (boundaries[i-1], boundaries[i]);
@@ -131,25 +132,19 @@ namespace FortunesAlgoritmGeometry
     }
 
     public class BoundaryNeg : Boundary { // = the left downward curve
-        public BoundaryNeg(BoundaryBase b) : base(b) {}
-        public static implicit operator BoundaryBase(BoundaryNeg b) => b.baseclass;
-        public static implicit operator BoundaryNeg(BoundaryBase b) => new BoundaryNeg(b);
+        public BoundaryNeg(Boundary b) : base(b) {}
 
         protected new bool IsOnLine() { return true; }
     }
 
     public class BoundaryPos : Boundary {  // = the right upward curve
-        public BoundaryPos(BoundaryBase b) : base(b) {}
-        public static implicit operator BoundaryBase(BoundaryPos b) => b.baseclass;
-        public static implicit operator BoundaryPos(BoundaryBase b) => new BoundaryPos(b);
+        public BoundaryPos(Boundary b) : base(b) {}
 
         protected new bool IsOnLine() { return true; }
     }
 
     public class BoundaryZero : Boundary { // = a straight upward line
-        public BoundaryZero(BoundaryBase b): base(b){}
-        public static implicit operator BoundaryBase(BoundaryZero b) => b.baseclass;
-        public static implicit operator BoundaryZero(BoundaryBase b) => new BoundaryZero(b);
+        public BoundaryZero(Boundary b): base(b){}
 
         protected new bool IsOnLine() { return true; }
     }
