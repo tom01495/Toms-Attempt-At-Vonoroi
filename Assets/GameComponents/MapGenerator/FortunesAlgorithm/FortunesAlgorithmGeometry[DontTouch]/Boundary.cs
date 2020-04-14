@@ -15,6 +15,25 @@ namespace FortunesAlgoritmGeometry
 
         protected BoundaryModel model;
 
+        protected class BoundaryModel {
+            public Site leftSite;
+            public Site rightSite;
+            public Vertex summit; //Vertex?
+            public Vertex base_; //Vertex?
+
+            public BoundaryModel(Site leftSite, Site rightSite) {
+                if(leftSite.x < rightSite.x) {
+                    this.leftSite = leftSite;
+                    this.rightSite = rightSite;
+                } else {
+                    this.leftSite = rightSite;
+                    this.rightSite = leftSite;
+                }
+
+                this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this)); // TODO remove these 2 whole lines once the code works
+                this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this)); // (needs to be null by default)
+            }
+        }
 
         // =============================== Constructors
 
@@ -23,7 +42,6 @@ namespace FortunesAlgoritmGeometry
         }
         protected Boundary(Boundary b) { this.model = b.model; }
         protected Boundary(BoundaryModel b) { this.model = b; }
-        
 
         // =============================== Intersection
 
@@ -70,14 +88,12 @@ namespace FortunesAlgoritmGeometry
             return null; // They are parallel
         }
 
-        protected new bool IsOnLine(Point p) => true;
+        protected bool IsOnLine(Point p) => true;
 
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
             if(p.GetType()==typeof(Vertex)) {
-                Vertex inter = C1.Intersection(C2); //Vertex?
-                if(inter != null) {
-                    return Mathf.Approximately(inter.x, p.x) && Mathf.Approximately(inter.y, p.y);
-                }
+                Vertex v = (Vertex)p;
+                return v.LeftBoundary == C1 && v.RightBoundary == C2;
             }
             return false;
         }
@@ -100,44 +116,29 @@ namespace FortunesAlgoritmGeometry
         public BoundaryNeg Neg() => new BoundaryNeg(this);
         public BoundaryPos Pos() => new BoundaryPos(this);
         public BoundaryZero Zero() => new BoundaryZero(this);
+    }
 
+    public class BoundaryNeg : Boundary {
+        public BoundaryNeg(Boundary b) : base(b) {}
 
-        protected class BoundaryModel {
-            public Site leftSite;
-            public Site rightSite;
-            public Vertex summit; //Vertex?
-            public Vertex base_; //Vertex?
-
-            public BoundaryModel(Site leftSite, Site rightSite) {
-                if(leftSite.x < rightSite.x) {
-                    this.leftSite = leftSite;
-                    this.rightSite = rightSite;
-                } else {
-                    this.leftSite = rightSite;
-                    this.rightSite = leftSite;
-                }
-
-                this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this)); // TODO remove these 2 whole lines once the code works
-                this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this)); // (needs to be null by default)
-            }
+        protected new bool IsOnLine(Point p) {
+            return p.y < (LeftSite.y+RightSite.y)/2; 
         }
     }
 
-    public class BoundaryNeg : Boundary { // = the left downward curve
-        public BoundaryNeg(Boundary b) : base(b) {}
-
-        protected new bool IsOnLine() { return true; }
-    }
-
-    public class BoundaryPos : Boundary {  // = the right upward curve
+    public class BoundaryPos : Boundary {
         public BoundaryPos(Boundary b) : base(b) {}
 
-        protected new bool IsOnLine() { return true; }
+        protected new bool IsOnLine(Point p) {
+            return p.y > (LeftSite.y+RightSite.y)/2;
+        }
     }
 
-    public class BoundaryZero : Boundary { // = a straight upward line
+    public class BoundaryZero : Boundary {
         public BoundaryZero(Boundary b): base(b){}
 
-        protected new bool IsOnLine() { return true; }
+        protected new bool IsOnLine(Point p) {
+            return true; 
+        }
     }
 }

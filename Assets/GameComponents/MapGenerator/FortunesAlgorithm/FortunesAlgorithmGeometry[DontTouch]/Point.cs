@@ -18,10 +18,6 @@ namespace FortunesAlgoritmGeometry
             else if (y < p.y || (Mathf.Approximately(y, p.y) && x < p.x)) return -1;
             else return 1;
         }
-
-        public Point Star(Site s) {
-            return new Point(x, y + Dist(s));
-        }
     }
 
     public class Vertex : Point {

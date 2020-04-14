@@ -52,8 +52,8 @@ public class FortunesAlgorithm {
     private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
         Region Rq;
         int index;
-        Boundary Crq; // Can stay null //Boundary?
-        Boundary Cqs; // Can stay null //Boundary?
+        Boundary Crq; //Boundary?
+        Boundary Cqs; //Boundary?
 
         (Rq, index, Crq, Cqs) = FindRegion(p, T);
         Site q = Rq.site;
@@ -71,8 +71,8 @@ public class FortunesAlgorithm {
 
     private (Region, int, Boundary, Boundary) FindRegion(Site p, List<PointSet> T) { //Boundary? Crq, Boundary? Cqs
         Region Rq = Region.InRegion(T.OfType<Region>().ToList(), p);
-        Boundary Crq = null; // Can stay null //Boundary?
-        Boundary Cqs = null; // Can stay null //Boundary?
+        Boundary Crq = null; //Boundary?
+        Boundary Cqs = null; //Boundary?
 
         int index = T.IndexOf(Rq);
         if(index > 0) {
@@ -95,9 +95,8 @@ public class FortunesAlgorithm {
         Boundary Cqr;
         Boundary Crs;
         int index;
-
-        Boundary Cuq = null; // Can stay null //Boundary?
-        Boundary Csv = null; // Can stay null //Boundary?
+        Boundary Cuq; //Boundary?
+        Boundary Csv; //Boundary?
 
         (Cqr, Crs, index, Cuq, Csv) = FindIntersection(p, T);
         Site q = Cqr.LeftSite;
@@ -124,8 +123,8 @@ public class FortunesAlgorithm {
     private (Boundary, Boundary, int, Boundary, Boundary) FindIntersection(Vertex p, List<PointSet> T) { //Boundary? Cuq, Boundary? Csv
         Boundary Cqr = p.LeftBoundary;
         Boundary Crs = p.RightBoundary;
-        Boundary Cuq = null; // Can stay null //Boundary?
-        Boundary Csv = null; // Can stay null //Boundary?
+        Boundary Cuq = null; //Boundary?
+        Boundary Csv = null; //Boundary?
 
         int index = T.IndexOf(Crs);
         if(index == -1) throw new Exception("Border not found!");
