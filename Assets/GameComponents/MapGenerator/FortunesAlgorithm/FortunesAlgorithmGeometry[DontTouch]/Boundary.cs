@@ -22,16 +22,11 @@ namespace FortunesAlgoritmGeometry
             public Vertex base_; //Vertex?
 
             public BoundaryModel(Site leftSite, Site rightSite) {
-                if(leftSite.x < rightSite.x) {
-                    this.leftSite = leftSite;
-                    this.rightSite = rightSite;
-                } else {
-                    this.leftSite = rightSite;
-                    this.rightSite = leftSite;
-                }
+                this.leftSite = leftSite;
+                this.rightSite = rightSite;
 
-                this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this)); // TODO remove these 2 whole lines once the code works
-                this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this)); // (needs to be null by default)
+                //this.summit = new Vertex(0,0, new Boundary(this), new Boundary(this)); // TODO remove these 2 whole lines once the code works
+                //this.base_ = new Vertex(0,0, new Boundary(this), new Boundary(this)); // (needs to be null by default)
             }
         }
 
@@ -82,7 +77,7 @@ namespace FortunesAlgoritmGeometry
                     y = (m1*c2 - m2*c1)/(m1 - m2);
                 }
 
-                Vertex v = new Vertex(x, y, new Boundary(this), new Boundary(model2));
+                Vertex v = new Vertex(x, y, this, C);
                 return IsOnLine(v)? v : null;
             }
             return null; // They are parallel
@@ -105,8 +100,22 @@ namespace FortunesAlgoritmGeometry
                 }
             }
             throw new Exception("No boundary intersection found!");
-        } 
+        }
 
+        // =============================== Overrides 
+
+        public override bool Equals(object obj) {
+            if(typeof(Boundary).IsInstanceOfType(obj)) {
+                Boundary other = ((Boundary)obj);
+                return other.LeftSite.Equals(LeftSite) && other.RightSite.Equals(RightSite);
+            }
+            return false;
+        }
+
+        public override int GetHashCode() { 
+            return model.GetHashCode();
+        }
+        
         // =============================== Conversion
 
         public UnsetBorderInit CreateUnsetBorder() {

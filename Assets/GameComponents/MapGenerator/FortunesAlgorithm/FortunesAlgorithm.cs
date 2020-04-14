@@ -107,8 +107,8 @@ public class FortunesAlgorithm {
         else if(q.y > s.y) { Cqs = Cqs.Pos(); }
         else { Cqs = Cqs.Zero(); }
 
-        T.RemoveRange(index, 3);
-        T.Insert(index, Cqs);
+        T.RemoveRange(index-2, 3);
+        T.Insert(index-2, Cqs);
 
         if(Cuq != null && Csv != null) {
             Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point));
@@ -126,8 +126,7 @@ public class FortunesAlgorithm {
         Boundary Cuq = null; //Boundary?
         Boundary Csv = null; //Boundary?
 
-        int index = T.IndexOf(Crs);
-        if(index == -1) throw new Exception("Border not found!");
+        int index = IndexOfBoundary(T, Crs);
         if(index > 3) { Cuq = T[index-4] as Boundary; }
         if(index < T.Count - 2) { Csv = T[index+2] as Boundary; }
 
@@ -154,6 +153,13 @@ public class FortunesAlgorithm {
 
     private static void AddIfNotNull(List<Point> Q, Point p) { //Point?
         if(p != null) Q.Add(p);
+    }
+
+    private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
+        for(int index = 0; index < T.Count; index++) {
+            if(C.Equals(T[index])) return index;
+        }
+        throw new Exception("Border not found!");
     }
 
     // ================================== Initiating Functions

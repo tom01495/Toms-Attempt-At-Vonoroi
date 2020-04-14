@@ -92,4 +92,22 @@ public class Coordinates {
         }
         return true;
     }
+
+    // ================================== Overrides
+
+    public override bool Equals(object obj){
+        if(typeof(Coordinates).IsInstanceOfType(obj)) {
+            Coordinates other = ((Coordinates)obj);
+            return Mathf.Approximately(other.x,x) && Mathf.Approximately(other.y,y);
+        }
+        return false;
+    }
+
+    public override int GetHashCode() {
+        return base.GetHashCode();
+    }
+
+    public override string ToString() {
+        return base.ToString();
+    }
 }
