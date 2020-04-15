@@ -7,13 +7,14 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
-        protected Site leftSite;
+        private Site leftSite;
         public Site LeftSite { get { return normal.leftSite; } }
-        protected Site rightSite;
+        private Site rightSite;
         public Site RightSite { get { return normal.rightSite; } }
-        protected Vertex summit; //Vertex?
+
+        private Vertex summit; //Vertex?
         public Vertex Summit { get { return normal.summit; } set { normal.summit = value; } }
-        protected Vertex base_; //Vertex?
+        private Vertex base_; //Vertex?
         public Vertex Base { get { return normal.base_; } set { normal.base_ = value; } }
 
         protected Boundary normal;
@@ -113,7 +114,8 @@ namespace FortunesAlgoritmGeometry {
         public BoundaryNeg(Boundary b) : base(b) {}
 
         protected new bool IsOnLine(Point p) {
-            return p.y < (LeftSite.y+RightSite.y)/2; 
+            Site lowest = LeftSite.y < RightSite.y ? LeftSite : RightSite;
+            return p.x < lowest.x; 
         }
     }
 
@@ -121,12 +123,13 @@ namespace FortunesAlgoritmGeometry {
         public BoundaryPos(Boundary b) : base(b) {}
 
         protected new bool IsOnLine(Point p) {
-            return p.y > (LeftSite.y+RightSite.y)/2;
+            Site lowest = LeftSite.y < RightSite.y ? LeftSite : RightSite;
+            return p.x > lowest.x;
         }
     }
 
     public class BoundaryZero : Boundary {
-        public BoundaryZero(Boundary b): base(b){}
+        public BoundaryZero(Boundary b): base(b) {}
 
         protected new bool IsOnLine(Point p) {
             return true; 

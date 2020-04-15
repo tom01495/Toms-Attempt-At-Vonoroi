@@ -60,8 +60,7 @@ public class FortunesAlgorithm {
 
         Boundary Cpq = new Boundary(p, q);
 
-        List<PointSet> additionT = new List<PointSet>(){
-            Cpq.Neg(), new Region(p), Cpq.Pos(), Rq};
+        List<PointSet> additionT = new List<PointSet>(){Cpq.Neg(), new Region(p), Cpq.Pos(), Rq};
         T.InsertRange(index+1, additionT);
 
         if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
@@ -95,19 +94,17 @@ public class FortunesAlgorithm {
         Site s = Crs.RightSite;
 
         Boundary Cqs = new Boundary(q, s);
-        if(q.y < s.y) { Cqs = Cqs.Neg(); }
+        if(q.y < s.y) { Cqs = Cqs.Neg(); } // TODO check this
         else if(q.y > s.y) { Cqs = Cqs.Pos(); }
         else { Cqs = Cqs.Zero(); }
 
-        T.RemoveRange(index-2, 3);
-        T.Insert(index-2, Cqs);
+        T.RemoveRange(index, 3);
+        T.Insert(index, Cqs);
 
-        if(Cuq != null && Csv != null) {
-            Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point));
-            Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point));
-            AddIfNotNull(Q, Cuq.Intersection(Cqs));
-            AddIfNotNull(Q, Cqs.Intersection(Csv));
-        }
+        if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
+        if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
+        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); }
+        if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
 
         CloseVertex(p, Cqr, Crs, Cqs);
     }
@@ -118,9 +115,9 @@ public class FortunesAlgorithm {
         Boundary Cuq = null; //Boundary?
         Boundary Csv = null; //Boundary?
 
-        int index = IndexOfBoundary(T, Crs);
-        if(index > 3) { Cuq = T[index-4] as Boundary; }
-        if(index < T.Count - 2) { Csv = T[index+2] as Boundary; }
+        int index = IndexOfBoundary(T, Cqr);
+        if(index > 1) { Cuq = T[index-2] as Boundary; }
+        if(index < T.Count - 4) { Csv = T[index+4] as Boundary; }
 
         return (Cqr, Crs, index, Cuq, Csv);
     }
