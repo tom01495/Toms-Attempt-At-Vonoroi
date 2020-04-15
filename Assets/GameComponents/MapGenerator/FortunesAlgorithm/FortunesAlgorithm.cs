@@ -94,8 +94,8 @@ public class FortunesAlgorithm {
         Site s = Crs.RightSite;
 
         Boundary Cqs = new Boundary(q, s);
-        if(q.y < s.y) { Cqs = Cqs.Neg(); } // TODO check this
-        else if(q.y > s.y) { Cqs = Cqs.Pos(); }
+        if(q.y > s.y) { Cqs = Cqs.Neg(); }
+        else if(q.y < s.y) { Cqs = Cqs.Pos(); }
         else { Cqs = Cqs.Zero(); }
 
         T.RemoveRange(index, 3);

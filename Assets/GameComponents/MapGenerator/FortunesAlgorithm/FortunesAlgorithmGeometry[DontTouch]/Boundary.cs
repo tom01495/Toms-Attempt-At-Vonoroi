@@ -8,9 +8,9 @@ using UnityEngine;
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
         private Site leftSite;
-        public Site LeftSite { get { return normal.leftSite; } }
+        public Site LeftSite { get { return rightOrder? normal.leftSite : normal.rightSite; } }
         private Site rightSite;
-        public Site RightSite { get { return normal.rightSite; } }
+        public Site RightSite { get { return rightOrder? normal.rightSite : normal.leftSite ; } }
 
         private Vertex summit; //Vertex?
         public Vertex Summit { get { return normal.summit; } set { normal.summit = value; } }
@@ -18,12 +18,19 @@ namespace FortunesAlgoritmGeometry {
         public Vertex Base { get { return normal.base_; } set { normal.base_ = value; } }
 
         protected Boundary normal;
+        protected bool rightOrder =  true;
 
         // =============================== Constructors
 
         public Boundary(Site leftSite, Site rightSite) {
-            this.leftSite = leftSite;
-            this.rightSite = rightSite;
+            bool isLeft = leftSite.x < rightSite.x;
+            if(isLeft) {
+                this.leftSite = leftSite;
+                this.rightSite = rightSite;
+            } else {
+                this.leftSite = rightSite;
+                this.rightSite = leftSite;
+            }
             this.normal = this; 
         }
         protected Boundary(Boundary b) { 
@@ -110,25 +117,29 @@ namespace FortunesAlgoritmGeometry {
         public Boundary Normal() => normal;
     }
 
-    public class BoundaryNeg : Boundary {
-        public BoundaryNeg(Boundary b) : base(b) {}
+    public class BoundaryNeg : Boundary { // goes <= that way
+        public BoundaryNeg(Boundary b) : base(b) {
+            if(LeftSite.y < RightSite.y) rightOrder = false;
+        }
 
         protected new bool IsOnLine(Point p) {
-            Site lowest = LeftSite.y < RightSite.y ? LeftSite : RightSite;
-            return p.x < lowest.x; 
+            Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
+            return p.x < lowestSite.x; 
         }
     }
 
-    public class BoundaryPos : Boundary {
-        public BoundaryPos(Boundary b) : base(b) {}
+    public class BoundaryPos : Boundary { // goes => that way
+        public BoundaryPos(Boundary b) : base(b) {
+            if(LeftSite.y > RightSite.y) rightOrder = false;
+        }
 
         protected new bool IsOnLine(Point p) {
-            Site lowest = LeftSite.y < RightSite.y ? LeftSite : RightSite;
-            return p.x > lowest.x;
+            Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
+            return p.x > lowestSite.x;
         }
     }
 
-    public class BoundaryZero : Boundary {
+    public class BoundaryZero : Boundary { // stays perfectly in the middle
         public BoundaryZero(Boundary b): base(b) {}
 
         protected new bool IsOnLine(Point p) {
