@@ -43,7 +43,7 @@ public class FortunesAlgorithm {
         }
 
         foreach(Boundary C in T.OfType<Boundary>()) {
-            V.Add(C);
+            AddIfNotInList(V, C);
         }
     }
 
@@ -75,16 +75,8 @@ public class FortunesAlgorithm {
         Boundary Cqs = null; //Boundary?
 
         int index = T.IndexOf(Rq);
-        if(index > 0) {
-            if(typeof(Boundary).IsInstanceOfType(T[index-1])) {
-                Crq = (Boundary)T[index-1];
-            }
-        }
-        if(index < T.Count - 1) {
-            if(typeof(Boundary).IsInstanceOfType(T[index+1])) {
-                Cqs = (Boundary)T[index+1];
-            }
-        }
+        if(index > 0) { Crq = T[index-1] as Boundary; }
+        if(index < T.Count - 1) { Cqs = T[index+1] as Boundary; }
 
         return (Rq, index, Crq, Cqs);
     }
@@ -135,12 +127,12 @@ public class FortunesAlgorithm {
 
     private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
         // TODO remember this moment as the moment a tile got closed and borders made
-        Cqr.summit = p;
-        Crs.summit = p;
-        Cqs.base_ = p;
+        Cqr.Summit = p;
+        Crs.Summit = p;
+        Cqs.Base = p;
 
-        V.Add(Cqr);
-        V.Add(Crs);
+        AddIfNotInList(V, Cqr.Normal());
+        AddIfNotInList(V, Crs.Normal());
     }
 
     // ================================== Additional Functions (as instructed)
@@ -151,8 +143,12 @@ public class FortunesAlgorithm {
         return p;
     }
 
-    private static void AddIfNotNull(List<Point> Q, Point p) { //Point?
-        if(p != null) Q.Add(p);
+    private static void AddIfNotNull<T>(List<T> L, T e) { //T?
+        if(e != null) L.Add(e);
+    }
+
+    private static void AddIfNotInList<T>(List<T> L, T e) {
+        if(!L.Contains(e)) L.Add(e);
     }
 
     private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
