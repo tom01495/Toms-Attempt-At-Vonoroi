@@ -8,9 +8,9 @@ using UnityEngine;
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
         private Site higherSite;
-        public Site LeftSite { get { return !isPositive ? normal.higherSite : normal.lowerSite; } }
+        public Site LeftSite { get { return NormalOrientation() ? normal.higherSite : normal.lowerSite; } }
         private Site lowerSite;
-        public Site RightSite { get { return !isPositive ? normal.lowerSite : normal.higherSite ; } }
+        public Site RightSite { get { return NormalOrientation() ? normal.lowerSite : normal.higherSite ; } }
 
         private Vertex summit; //Vertex?
         public Vertex Summit { get { return normal.summit; } set { normal.summit = value; } }
@@ -18,7 +18,6 @@ namespace FortunesAlgoritmGeometry {
         public Vertex Base { get { return normal.base_; } set { normal.base_ = value; } }
 
         protected Boundary normal;
-        protected bool isPositive =  false;
 
         // =============================== Constructors
 
@@ -81,8 +80,6 @@ namespace FortunesAlgoritmGeometry {
             return null; // They are parallel
         }
 
-        protected bool IsOnLine(Point p) => true;
-
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
             if(p.GetType()==typeof(Vertex)) {
                 Vertex v = (Vertex)p;
@@ -95,17 +92,24 @@ namespace FortunesAlgoritmGeometry {
 
         public override bool Equals(object obj) {
             if(typeof(Boundary).IsInstanceOfType(obj)) {
-                Boundary other = ((Boundary)obj);
-                return other.LeftSite.Equals(LeftSite) && other.RightSite.Equals(RightSite);
+                return GetHashCode() == obj.GetHashCode();
+                //Boundary other = ((Boundary)obj);
+                //return other.LeftSite.Equals(LeftSite) && other.RightSite.Equals(RightSite);
             }
             return false;
         }
 
-        public override int GetHashCode() { 
-            return normal.GetHashCode();
+        public override int GetHashCode() {
+            int hashCode = -877617570;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Site>.Default.GetHashCode(LeftSite);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Site>.Default.GetHashCode(RightSite);
+            return hashCode;
         }
         
         // =============================== Conversion
+
+        protected bool IsOnLine(Point p) => true;
+        protected bool NormalOrientation() =>  true;
 
         public UnsetBorderInit CreateUnsetBorder() {
             if(Base == null || Summit == null) throw new Exception("Base/Summit not set!");
@@ -120,6 +124,8 @@ namespace FortunesAlgoritmGeometry {
     public class BoundaryNeg : Boundary { // goes <= that way
         public BoundaryNeg(Boundary b) : base(b) {}
 
+        protected new bool NormalOrientation() => true;
+
         protected new bool IsOnLine(Point p) {
             Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
             return p.x < lowestSite.x; 
@@ -127,7 +133,9 @@ namespace FortunesAlgoritmGeometry {
     }
 
     public class BoundaryPos : Boundary { // goes => that way
-        public BoundaryPos(Boundary b) : base(b) { isPositive = true; }
+        public BoundaryPos(Boundary b) : base(b) {}
+
+        protected new bool NormalOrientation() => false;
 
         protected new bool IsOnLine(Point p) {
             Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
@@ -138,8 +146,8 @@ namespace FortunesAlgoritmGeometry {
     public class BoundaryZero : Boundary { // stays perfectly in the middle
         public BoundaryZero(Boundary b): base(b) {}
 
-        protected new bool IsOnLine(Point p) {
-            return true; 
-        }
+        protected new bool NormalOrientation() => true;
+
+        protected new bool IsOnLine(Point p) => true;
     }
 }
