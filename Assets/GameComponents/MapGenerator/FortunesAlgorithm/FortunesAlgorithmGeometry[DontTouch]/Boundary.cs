@@ -7,10 +7,10 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
-        private Site leftSite;
-        public Site LeftSite { get { return rightOrder? normal.leftSite : normal.rightSite; } }
-        private Site rightSite;
-        public Site RightSite { get { return rightOrder? normal.rightSite : normal.leftSite ; } }
+        private Site higherSite;
+        public Site LeftSite { get { return !isPositive ? normal.higherSite : normal.lowerSite; } }
+        private Site lowerSite;
+        public Site RightSite { get { return !isPositive ? normal.lowerSite : normal.higherSite ; } }
 
         private Vertex summit; //Vertex?
         public Vertex Summit { get { return normal.summit; } set { normal.summit = value; } }
@@ -18,18 +18,18 @@ namespace FortunesAlgoritmGeometry {
         public Vertex Base { get { return normal.base_; } set { normal.base_ = value; } }
 
         protected Boundary normal;
-        protected bool rightOrder =  true;
+        protected bool isPositive =  false;
 
         // =============================== Constructors
 
         public Boundary(Site leftSite, Site rightSite) {
-            bool isLeft = leftSite.x < rightSite.x;
-            if(isLeft) {
-                this.leftSite = leftSite;
-                this.rightSite = rightSite;
+            bool isHigher = leftSite.CompareTo(rightSite) >= 0;
+            if(isHigher) {
+                this.higherSite = leftSite;
+                this.lowerSite = rightSite;
             } else {
-                this.leftSite = rightSite;
-                this.rightSite = leftSite;
+                this.higherSite = rightSite;
+                this.lowerSite = leftSite;
             }
             this.normal = this; 
         }
@@ -118,9 +118,7 @@ namespace FortunesAlgoritmGeometry {
     }
 
     public class BoundaryNeg : Boundary { // goes <= that way
-        public BoundaryNeg(Boundary b) : base(b) {
-            if(LeftSite.y < RightSite.y) rightOrder = false;
-        }
+        public BoundaryNeg(Boundary b) : base(b) {}
 
         protected new bool IsOnLine(Point p) {
             Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
@@ -129,9 +127,7 @@ namespace FortunesAlgoritmGeometry {
     }
 
     public class BoundaryPos : Boundary { // goes => that way
-        public BoundaryPos(Boundary b) : base(b) {
-            if(LeftSite.y > RightSite.y) rightOrder = false;
-        }
+        public BoundaryPos(Boundary b) : base(b) { isPositive = true; }
 
         protected new bool IsOnLine(Point p) {
             Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
