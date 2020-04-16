@@ -15,10 +15,9 @@ public class FortunesAlgorithm {
     //private Dictionary<Coordinates, Coordinates> neighbouringBorders = new Dictionary<Coordinates, Coordinates>();
     //private Dictionary<Coordinates, Coordinates> surroundingBorders = new Dictionary<Coordinates, Coordinates>();
 
-    public FortunesAlgorithm(List<Coordinates> siteCoordinates, Rect bounds) {
+    public FortunesAlgorithm(List<Coordinates> siteCoordinates) {
         V = new List<Boundary>();
         A = new List<Region>();
-        this.bounds = bounds;
 
         List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
@@ -43,7 +42,7 @@ public class FortunesAlgorithm {
         }
 
         foreach(Boundary C in T.OfType<Boundary>()) {
-            AddIfNotInList(V, C);
+            AddIfNotInList(V, C.Normal());
         }
     }
 
@@ -190,6 +189,15 @@ public class FortunesAlgorithm {
 
     public FortunesAlgorithm MakeBoundariesWiggely() {
         // Minkowski Distance
+        return this;
+    }
+
+    public FortunesAlgorithm CutCorners(Rect bounds) {
+        // Creates 4 additional semi boundaries, like a box
+        // tries to find the closest intersections with boundaries without a summit/base
+        // for each of these intersections cuts the semi boundaries in short boundaries on the side
+        // make the neighbouring region both ends of the boundary (to prevent messing up checks later)
+        // add these side boundaries to the list of boundaries
         return this;
     }
 

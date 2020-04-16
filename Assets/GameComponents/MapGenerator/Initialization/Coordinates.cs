@@ -32,8 +32,8 @@ public class Coordinates {
     public static List<Coordinates> CreateRandomList(Rect bounds, int amount, float minDistance, int k = 30) {
         float cellSize = minDistance/(float)Math.Sqrt(2);
 
-        int width = (int)(bounds.width/cellSize);
-        int height = (int)(bounds.height/cellSize);
+        int width = Mathf.CeilToInt(bounds.width/cellSize);
+        int height = Mathf.CeilToInt(bounds.height/cellSize);
         int[,] map = new int[width, height];
 
         List<Coordinates> outputList = new List<Coordinates>();

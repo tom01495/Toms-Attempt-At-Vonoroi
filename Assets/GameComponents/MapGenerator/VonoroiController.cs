@@ -20,12 +20,12 @@ public class VonoroiController : MonoBehaviour
             model.bounds, 
             model.amountTiles, 
             model.minDistanceTiles);
-        FortunesAlgorithm algorithm = new FortunesAlgorithm(
-            tileCoordinates, 
-            model.bounds);
+        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
 
         // IMPROVE
         algorithm.RemoveShortBoundaries(model.minBoundaryLength);
+        algorithm.MakeBoundariesWiggely();
+        algorithm.CutCorners(model.bounds);
 
         // OUTPUT
         (model.borderInits, model.tileInits) = algorithm.GetBordersAndTiles();
