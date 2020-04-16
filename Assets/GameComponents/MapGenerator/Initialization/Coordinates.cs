@@ -108,6 +108,6 @@ public class Coordinates {
     }
 
     public override string ToString() {
-        return base.ToString();
+        return "(" + valueX.ToString() + "," + valueY.ToString() + ")";
     }
 }

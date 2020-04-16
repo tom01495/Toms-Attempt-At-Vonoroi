@@ -17,6 +17,25 @@ public class VonoroiController : MonoBehaviour
     }
 
     private void StartFortunesAlgorithm(VonoroiModel model) {
+        // INPUT
+        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(
+            model.bounds,
+            model.amountTiles,
+            model.minDistanceTiles);
+        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
+
+        DebugVonoroi(tileCoordinates);
+
+        // IMPROVE
+        algorithm.RemoveShortBoundaries(model.minBoundaryLength);
+        algorithm.MakeBoundariesWiggely();
+        algorithm.CutCorners(model.bounds);
+
+        // OUTPUT
+        (model.borderInits, model.tileInits) = algorithm.GetBordersAndTiles();
+    }
+
+    private void DebugVonoroi(List<Coordinates> tileCoordinates) {
         // Vector3 va = new Vector3(0, 0, 0);
         // Vector3 vb = new Vector3(20, 10, 0);
         // Boundary a = new Boundary(new Site(va.x, va.y), new Site(vb.x,vb.y));
@@ -32,13 +51,6 @@ public class VonoroiController : MonoBehaviour
         // GameObject go = Instantiate(sphere);
         // go.transform.position = new Vector3(intersect.x, intersect.y, 0);
         // return;
-        // INPUT
-        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(
-            model.bounds,
-            model.amountTiles,
-            model.minDistanceTiles);
-        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
-
 
         GameObject go = new GameObject();
         foreach(Coordinates c in tileCoordinates){
@@ -46,12 +58,5 @@ public class VonoroiController : MonoBehaviour
             obj.transform.position = new Vector3(c.x, c.y, 0);
             obj.transform.parent = go.transform;
         }
-        // IMPROVE
-        algorithm.RemoveShortBoundaries(model.minBoundaryLength);
-        algorithm.MakeBoundariesWiggely();
-        algorithm.CutCorners(model.bounds);
-
-        // OUTPUT
-        (model.borderInits, model.tileInits) = algorithm.GetBordersAndTiles();
     }
 }

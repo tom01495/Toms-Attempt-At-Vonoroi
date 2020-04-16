@@ -8,35 +8,42 @@ using UnityEngine;
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
         protected class BoundaryData {
-            public Site higherSite;
-            public Site lowerSite;
+            private Site higher;
+            public Site higherSite { get { return higher; } }
+            private Site lower;
+            public Site lowerSite { get { return lower; } }
             public Vertex summit; //Vertex?
             public Vertex base_; //Vertex?
+
+            public BoundaryData(Site leftSite, Site rightSite) {
+                bool leftIsHigher = leftSite.CompareTo(rightSite) >= 0;
+                if(leftIsHigher) {
+                    higher = leftSite;
+                    lower = rightSite;
+                } else {
+                    higher = rightSite;
+                    lower = leftSite;
+                }
+            }
         }
 
-        public virtual Site LeftSite { get {return data.higherSite;} }
-        public virtual Site RightSite { get {return data.lowerSite;} }
+        public virtual Site LeftSite { get { return data.higherSite; } }
+        public virtual Site RightSite { get { return data.lowerSite; } }
 
-        public Vertex Summit { get { return data.summit; } set { data.summit = value; } }
-        public Vertex Base { get { return data.base_; } set { data.base_ = value; } }
+        public Vertex Base { 
+            get { return data.base_; } 
+            set { data.base_ = value; } } // start of the line
+        public Vertex Summit { 
+            get { return data.summit; } 
+            set { if(data.summit == null) data.summit = value;
+                  else data.base_ = value; } } // end of the line
 
         protected BoundaryData data;
 
         // =============================== Constructors
 
         public Boundary(Site leftSite, Site rightSite) {
-            bool isHigher = leftSite.CompareTo(rightSite) >= 0;
-            if(isHigher) {
-                data = new BoundaryData{
-                    higherSite=leftSite,
-                    lowerSite=rightSite
-                };
-            } else {
-                data = new BoundaryData{
-                    higherSite=rightSite,
-                    lowerSite=leftSite
-                };
-            }
+            data = new BoundaryData(leftSite, rightSite);
         }
 
         protected Boundary(Boundary b) {
@@ -44,6 +51,7 @@ namespace FortunesAlgoritmGeometry {
         }
 
         // =============================== Intersection
+
         public Vertex Intersection(Boundary C) { //Vertex?
             float divY1 = LeftSite.y - RightSite.y;
             float divY2 = C.LeftSite.y - C.RightSite.y;
@@ -80,10 +88,17 @@ namespace FortunesAlgoritmGeometry {
                     y = (m1*c2 - m2*c1)/(m1 - m2);
                 }
 
-                Vertex v = new Vertex(x, y, this, C); // TODO
+                (Boundary leftBoundary, Boundary rightBoundary) = sortLeftAndRight(this, C);
+                Vertex v = new Vertex(x, y, leftBoundary, rightBoundary);
                 return IsOnLine(v)? v : null;
             }
             return null; // They are parallel
+        }
+
+        private static (Boundary, Boundary) sortLeftAndRight(Boundary C1, Boundary C2) {
+            if(C1.RightSite.Equals(C2.LeftSite)) { return (C1, C2); }
+            else if(C2.RightSite.Equals(C1.LeftSite)) { return (C2, C1); }
+            else throw new Exception("Boundaries are not neighbours!");
         }
 
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
@@ -100,10 +115,11 @@ namespace FortunesAlgoritmGeometry {
             if(typeof(Boundary).IsInstanceOfType(obj)) {
                 Boundary b = obj as Boundary;
                 return LeftSite.Equals(b.LeftSite) && RightSite.Equals(b.RightSite);
-                // return data == (obj as Boundary).data;
             }
             return false;
         }
+
+        //Maybe make a function called "bool SameModel(Boundary C)" instead?
         public static bool operator != (Boundary a, Boundary b) =>  !(a == b);
         public static bool operator == (Boundary a, Boundary b) => a?.data == b?.data;
 
@@ -118,6 +134,7 @@ namespace FortunesAlgoritmGeometry {
         // =============================== Conversion
 
         protected virtual bool IsOnLine(Point p) => true;
+
         public UnsetBorderInit CreateUnsetBorder() {
             if(Base == null || Summit == null) return null; //throw new Exception("Base/Summit not set!");
             return new UnsetBorderInit(LeftSite, RightSite, Base, Summit);
@@ -130,8 +147,10 @@ namespace FortunesAlgoritmGeometry {
 
     public class BoundaryNeg : Boundary { // goes <= that way
         public BoundaryNeg(Boundary b) : base(b) {}
+
         public override Site LeftSite { get {return data.higherSite;} }
         public override Site RightSite { get {return data.lowerSite;} }
+
         protected override bool IsOnLine(Point p){
             return (data.base_ != null)? p.x <= data.base_.x :
                                          p.x <= data.lowerSite.x;
@@ -140,8 +159,10 @@ namespace FortunesAlgoritmGeometry {
 
     public class BoundaryPos : Boundary { // goes => that way
         public BoundaryPos(Boundary b) : base(b) {}
+
         public override Site LeftSite { get {return data.lowerSite;} }
         public override Site RightSite { get {return data.higherSite;} }
+
         protected override bool IsOnLine(Point p){
             return (data.base_ != null)? p.x >= data.base_.x :
                                          p.x >= data.lowerSite.x;

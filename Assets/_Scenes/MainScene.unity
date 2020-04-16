@@ -231,6 +231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20a310c408956034aa234f9042a4d7f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sphere: {fileID: 8154386623925255806, guid: aa8bacf78757ff3219196d6a1e3adce2, type: 3}
 --- !u!114 &519420034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,6 +248,6 @@ MonoBehaviour:
   yMin: 0
   xMax: 1000
   yMax: 1000
-  amountTiles: 100
+  amountTiles: 10
   minDistanceTiles: 5
   minBoundaryLength: 100
