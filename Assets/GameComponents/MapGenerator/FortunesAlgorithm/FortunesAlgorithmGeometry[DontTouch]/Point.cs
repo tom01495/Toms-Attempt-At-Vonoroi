@@ -34,5 +34,15 @@ namespace FortunesAlgoritmGeometry
 
     public class Site : Point {
         public Site(float x, float y) : base(x, y) {}
+        public override string ToString(){
+            return "(" + valueX.ToString() + "," + valueY.ToString() + ")";
+        }
+        public override bool Equals(object obj){
+            if(typeof(Site).IsInstanceOfType(obj)){
+                Site s = obj as Site;
+                return Mathf.Approximately(x, s.x) && Mathf.Approximately(y, s.y);
+            }
+            return false;
+        }
     }
 }

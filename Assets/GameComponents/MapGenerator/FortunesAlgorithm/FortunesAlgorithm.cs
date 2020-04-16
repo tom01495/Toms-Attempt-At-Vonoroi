@@ -14,19 +14,10 @@ public class FortunesAlgorithm {
         V = new List<Boundary>();
         A = new List<Region>();
 
-        Boundary a = new Boundary(new Site(0, 10), new Site(5,15));
-        Boundary n = a.Neg();
-        Boundary p = a.Pos();
-        Boundary t = a.Normal();
-        Boundary z = a.Zero();
+        List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
+        S.Sort();
 
-        Site sn = n.LeftSite;
-        Site sp = p.LeftSite;
-
-        // List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
-        // S.Sort();
-
-        // FortunesPlaneSweepingAlgorithm(S);
+        FortunesPlaneSweepingAlgorithm(S);
     }
 
     private void FortunesPlaneSweepingAlgorithm(List<Site> S) {
@@ -104,12 +95,12 @@ public class FortunesAlgorithm {
         T.RemoveRange(index, 3);
         T.Insert(index, Cqs);
 
+        CloseVertex(p, Cqr, Crs, Cqs);
+
         if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
         if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
         if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); }
         if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
-
-        CloseVertex(p, Cqr, Crs, Cqs);
     }
 
     private (Boundary, Boundary, int, Boundary, Boundary) FindIntersection(Vertex p, List<PointSet> T) { //Boundary? Cuq, Boundary? Csv
@@ -119,6 +110,9 @@ public class FortunesAlgorithm {
         Boundary Csv = null; //Boundary?
 
         int index = IndexOfBoundary(T, Cqr);
+        if(!Crs.Equals(T[index+2])){
+            throw new Exception("Incorrect Boundaries in FindIntersection");
+        }
         if(index > 1) { Cuq = T[index-2] as Boundary; }
         if(index < T.Count - 4) { Csv = T[index+4] as Boundary; }
 
@@ -153,7 +147,8 @@ public class FortunesAlgorithm {
 
     private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
         for(int index = 0; index < T.Count; index++) {
-            if(C.Equals(T[index])) return index;
+            Boundary elem = T[index] as Boundary;
+            if(elem != null && C.Equals(elem)) { return index; }
         }
         throw new Exception("Border not found!");
     }

@@ -55,13 +55,13 @@ namespace FortunesAlgoritmGeometry {
             float c1 = -1;
             if(!line1isStraight) {
                 m1 = -(LeftSite.x - RightSite.x)/divY1;
-                c1 = LeftSite.y - m1*RightSite.x;
+                c1 = ((LeftSite.y + RightSite.y) / 2f) - m1*((RightSite.x + LeftSite.x) / 2f);
             }
             float m2 = -1;
             float c2 = -1;
             if(!line2isStraight) {
                 m2 = -(C.LeftSite.x - C.RightSite.x)/divY2;
-                c2 = C.LeftSite.y - m2*C.RightSite.x;
+                c2 = ((C.LeftSite.y + C.RightSite.y) / 2f) - m2*((C.RightSite.x + C.LeftSite.x) / 2f);
             }
 
             // Step 2: Intersection of the two lines
@@ -70,11 +70,11 @@ namespace FortunesAlgoritmGeometry {
                 float y;
 
                 if(line1isStraight) {
-                    x = LeftSite.x;
-                    y = m2*LeftSite.x + c2;
+                    x = (RightSite.x + LeftSite.x) /2f;
+                    y = m2*x + c2;
                 } else if (line2isStraight) {
-                    x = C.LeftSite.x;
-                    y = m1*C.LeftSite.x + c1;
+                    x = (RightSite.x + C.LeftSite.x) / 2f;
+                    y = m1*x + c1;
                 } else {
                     x = (c2 - c1)/(m1 - m2);
                     y = (m1*c2 - m2*c1)/(m1 - m2);
@@ -87,7 +87,7 @@ namespace FortunesAlgoritmGeometry {
         }
 
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
-            if(p.GetType()==typeof(Vertex)) {
+            if(typeof(Vertex).IsInstanceOfType(p)) {
                 Vertex v = (Vertex)p;
                 return v.LeftBoundary == C1 && v.RightBoundary == C2;
             }
@@ -98,18 +98,18 @@ namespace FortunesAlgoritmGeometry {
 
         public override bool Equals(object obj) {
             if(typeof(Boundary).IsInstanceOfType(obj)) {
-                return data == (obj as Boundary).data;
+                Boundary b = obj as Boundary;
+                return LeftSite.Equals(b.LeftSite) && RightSite.Equals(b.RightSite);
+                // return data == (obj as Boundary).data;
             }
             return false;
         }
+        public static bool operator != (Boundary a, Boundary b) =>  !(a == b);
+        public static bool operator == (Boundary a, Boundary b) => a?.data == b?.data;
 
-        public static bool operator != (Boundary a, Boundary b){
-            return !(a == b);
+        public override string ToString() {
+            return LeftSite.ToString() + RightSite.ToString();
         }
-        public static bool operator == (Boundary a, Boundary b){
-            return a?.data == b?.data;
-        }
-
 
         public override int GetHashCode() {
             return data.GetHashCode();
@@ -119,7 +119,7 @@ namespace FortunesAlgoritmGeometry {
 
         protected virtual bool IsOnLine(Point p) => true;
         public UnsetBorderInit CreateUnsetBorder() {
-            if(Base == null || Summit == null) throw new Exception("Base/Summit not set!");
+            if(Base == null || Summit == null) return null; //throw new Exception("Base/Summit not set!");
             return new UnsetBorderInit(LeftSite, RightSite, Base, Summit);
         }
         public BoundaryNeg Neg() => new BoundaryNeg(this);
@@ -132,14 +132,20 @@ namespace FortunesAlgoritmGeometry {
         public BoundaryNeg(Boundary b) : base(b) {}
         public override Site LeftSite { get {return data.higherSite;} }
         public override Site RightSite { get {return data.lowerSite;} }
-        protected override bool IsOnLine(Point p) => p.x <= data.lowerSite.x;
+        protected override bool IsOnLine(Point p){
+            return (data.base_ != null)? p.x <= data.base_.x :
+                                         p.x <= data.lowerSite.x;
+        }
     }
 
     public class BoundaryPos : Boundary { // goes => that way
         public BoundaryPos(Boundary b) : base(b) {}
         public override Site LeftSite { get {return data.lowerSite;} }
         public override Site RightSite { get {return data.higherSite;} }
-        protected override bool IsOnLine(Point p) => p.x >= data.lowerSite.x;
+        protected override bool IsOnLine(Point p){
+            return (data.base_ != null)? p.x >= data.base_.x :
+                                         p.x >= data.lowerSite.x;
+        }
     }
 
     public class BoundaryZero : Boundary { // stays perfectly in the middle
