@@ -14,10 +14,19 @@ public class FortunesAlgorithm {
         V = new List<Boundary>();
         A = new List<Region>();
 
-        List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
-        S.Sort();
+        Boundary a = new Boundary(new Site(0, 10), new Site(5,15));
+        Boundary n = a.Neg();
+        Boundary p = a.Pos();
+        Boundary t = a.Normal();
+        Boundary z = a.Zero();
 
-        FortunesPlaneSweepingAlgorithm(S);
+        Site sn = n.LeftSite;
+        Site sp = p.LeftSite;
+
+        // List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
+        // S.Sort();
+
+        // FortunesPlaneSweepingAlgorithm(S);
     }
 
     private void FortunesPlaneSweepingAlgorithm(List<Site> S) {
@@ -49,7 +58,7 @@ public class FortunesAlgorithm {
         Boundary Crq; //Boundary?
         Boundary Cqs; //Boundary?
 
-        (Rq, index, Crq, Cqs) = FindRegion(p, T);
+        (Rq, index, Crq, Cqs) = FindRegion(p, T); //Find region under p
         Site q = Rq.site;
 
         Boundary Cpq = new Boundary(p, q);
