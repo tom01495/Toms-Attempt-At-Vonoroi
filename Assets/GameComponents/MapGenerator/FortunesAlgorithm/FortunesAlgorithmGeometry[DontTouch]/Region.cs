@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-// THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
+// THIS NAMESPACE SHOULD ONLY BE USED BY THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
     public interface PointSet {} 

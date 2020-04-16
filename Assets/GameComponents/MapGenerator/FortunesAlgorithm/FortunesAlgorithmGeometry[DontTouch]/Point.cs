@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
+// THIS NAMESPACE SHOULD ONLY BE USED By THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
 {
     public class Point : Coordinates, IComparable<Point>

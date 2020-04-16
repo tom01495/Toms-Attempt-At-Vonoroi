@@ -9,11 +9,6 @@ using UnityEngine;
 public class FortunesAlgorithm {
     private List<Boundary> V;
     private List<Region> A;
-    private Rect bounds;
-
-    // TODO fix this (but maybe see if you can do this later)
-    //private Dictionary<Coordinates, Coordinates> neighbouringBorders = new Dictionary<Coordinates, Coordinates>();
-    //private Dictionary<Coordinates, Coordinates> surroundingBorders = new Dictionary<Coordinates, Coordinates>();
 
     public FortunesAlgorithm(List<Coordinates> siteCoordinates) {
         V = new List<Boundary>();
@@ -31,7 +26,7 @@ public class FortunesAlgorithm {
         List<PointSet> T = InitialT(initialSites);
 
         while(Q.Any()) {
-            Point p = DeleteMin(Q);
+            Point p = DeleteMax(Q);
 
             if(p.GetType()==typeof(Site)) {
                 SiteEvent((Site)p, Q, T);
@@ -110,7 +105,7 @@ public class FortunesAlgorithm {
 
     private (Boundary, Boundary, int, Boundary, Boundary) FindIntersection(Vertex p, List<PointSet> T) { //Boundary? Cuq, Boundary? Csv
         Boundary Cqr = p.LeftBoundary;
-        Boundary Crs = p.RightBoundary;
+        Boundary Crs = p.RightBoundary; // TODO check this
         Boundary Cuq = null; //Boundary?
         Boundary Csv = null; //Boundary?
 
@@ -133,8 +128,8 @@ public class FortunesAlgorithm {
 
     // ================================== Additional Functions (as instructed)
 
-    private static Point DeleteMin(List<Point> Q) {
-        Point p = Q.Min();
+    private static Point DeleteMax(List<Point> Q) {
+        Point p = Q.Max();
         Q.Remove(p);
         return p;
     }
@@ -157,7 +152,7 @@ public class FortunesAlgorithm {
     // ================================== Initiating Functions
 
     private static List<Site> InitialSites(List<Site> S) {
-        return S.Where(p => p.CompareTo(S.Min()) == 0).ToList();
+        return S.Where(p => p.CompareTo(S.Max()) == 0).ToList();
     }
 
     private static List<Point> InitialQ(List<Site> initialSites, List<Site> S) {

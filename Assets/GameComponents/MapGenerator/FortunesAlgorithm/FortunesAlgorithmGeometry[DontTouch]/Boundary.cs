@@ -4,7 +4,7 @@ using UnityEngine;
 
 //#nullable enable // Unity doesnt like this
 
-// THIS NAMESPACE SHOULD ONLY BE USED FOR THE ALGORITHM!!!
+// THIS NAMESPACE SHOULD ONLY BE USED BY THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
         private Site higherSite;
@@ -74,7 +74,7 @@ namespace FortunesAlgoritmGeometry {
                     y = (m1*c2 - m2*c1)/(m1 - m2);
                 }
 
-                Vertex v = new Vertex(x, y, this, C);
+                Vertex v = new Vertex(x, y, this, C); // TODO
                 return IsOnLine(v)? v : null;
             }
             return null; // They are parallel
@@ -108,8 +108,8 @@ namespace FortunesAlgoritmGeometry {
         
         // =============================== Conversion
 
-        protected bool IsOnLine(Point p) => true;
-        protected bool NormalOrientation() =>  true;
+        protected virtual bool IsOnLine(Point p) => true;
+        protected virtual bool NormalOrientation() =>  true;
 
         public UnsetBorderInit CreateUnsetBorder() {
             if(Base == null || Summit == null) throw new Exception("Base/Summit not set!");
@@ -124,9 +124,9 @@ namespace FortunesAlgoritmGeometry {
     public class BoundaryNeg : Boundary { // goes <= that way
         public BoundaryNeg(Boundary b) : base(b) {}
 
-        protected new bool NormalOrientation() => true;
+        protected override bool NormalOrientation() => true;
 
-        protected new bool IsOnLine(Point p) {
+        protected override bool IsOnLine(Point p) {
             Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
             return p.x < lowestSite.x; 
         }
@@ -135,9 +135,9 @@ namespace FortunesAlgoritmGeometry {
     public class BoundaryPos : Boundary { // goes => that way
         public BoundaryPos(Boundary b) : base(b) {}
 
-        protected new bool NormalOrientation() => false;
+        protected override bool NormalOrientation() => false;
 
-        protected new bool IsOnLine(Point p) {
+        protected override bool IsOnLine(Point p) {
             Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
             return p.x > lowestSite.x;
         }
@@ -146,8 +146,8 @@ namespace FortunesAlgoritmGeometry {
     public class BoundaryZero : Boundary { // stays perfectly in the middle
         public BoundaryZero(Boundary b): base(b) {}
 
-        protected new bool NormalOrientation() => true;
+        protected override bool NormalOrientation() => true;
 
-        protected new bool IsOnLine(Point p) => true;
+        protected override bool IsOnLine(Point p) => true;
     }
 }
