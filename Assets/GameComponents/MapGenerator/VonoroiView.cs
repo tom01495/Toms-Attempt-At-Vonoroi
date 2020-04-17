@@ -23,9 +23,6 @@ public class VonoroiView : MonoBehaviour
 
     public void ShowBorders(List<BorderInit> borders) {
         foreach(BorderInit b in borders) {
-            if(b?.CoordBase?.x == null || b?.CoordBase?.y == null) continue;
-            if(b?.CoordSummit?.x == null || b?.CoordSummit?.y == null) continue;
-            Debug.DrawLine(new Vector3(b.CoordBase.x, b.CoordBase.y, 0), new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0), Color.red, 10000000);
             // lineRenderer.SetPosition(0, new Vector3(b.CoordBase.x, b.CoordBase.y, 0));
             // lineRenderer.SetPosition(1, new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0));
             // Instantiate(lineRenderer);

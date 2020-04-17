@@ -14,6 +14,8 @@ public class FortunesAlgorithm {
         V = new List<Boundary>();
         A = new List<Region>();
 
+        VonoroiDebugger.ShowCoordinates(siteCoordinates); // TODO remove
+
         List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
 
@@ -34,6 +36,8 @@ public class FortunesAlgorithm {
             else if(p.GetType()==typeof(Vertex)) {
                 CircleEvent((Vertex)p, Q, T);
             }
+
+            VonoroiDebugger.ShowBoundaries(V); // TODO remove
         }
 
         foreach(Boundary C in T.OfType<Boundary>()) {
