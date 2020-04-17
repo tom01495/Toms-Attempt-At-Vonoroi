@@ -55,21 +55,15 @@ public class VonoroiDebugger : MonoBehaviour {
             Color lineColor = Color.black;
 
             // Setting the startpoint
-            if(lineIsStraight) { 
-                start = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f,yMin, 0);
-            } else { 
-                start = new Vector3(xMin, m*xMin + c, 0); 
-            }
+            if(!lineIsStraight) { start = new Vector3(xMin, m*xMin + c, 0); }
+            else { start = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f,yMin, 0); }
 
             // Setting the endpoint
-            if(lineIsStraight) { 
-                end = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f, yMax, 0);
-            } else { 
-                end = new Vector3(xMax, m*xMax + c, 0); 
-            }
+            if(!lineIsStraight) { end = new Vector3(xMax, m*xMax + c, 0); }
+            else { end = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f, yMax, 0); }
 
             if(C.Base?.x != null) { lineColor = Color.blue; }
-            if(C.Summit?.x != null) { lineColor = Color.cyan; }
+            if(C.Summit?.x != null) { lineColor = Color.red; }
             if(C.Base?.x != null && C.Summit?.x != null) {
                 lineColor = Color.green;
                 start = new Vector3(C.Base.x, C.Base.y, 0);
