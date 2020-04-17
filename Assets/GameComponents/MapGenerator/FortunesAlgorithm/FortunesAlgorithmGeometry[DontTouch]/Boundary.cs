@@ -81,7 +81,7 @@ namespace FortunesAlgoritmGeometry {
                     x = (RightSite.x + LeftSite.x) /2f;
                     y = m2*x + c2;
                 } else if (line2isStraight) {
-                    x = (RightSite.x + C.LeftSite.x) / 2f;
+                    x = (C.RightSite.x + C.LeftSite.x) / 2f;
                     y = m1*x + c1;
                 } else {
                     x = (c2 - c1)/(m1 - m2);

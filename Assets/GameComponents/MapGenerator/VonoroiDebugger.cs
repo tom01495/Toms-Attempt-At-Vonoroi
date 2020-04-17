@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FortunesAlgoritmGeometry;
 using UnityEngine;
 
@@ -32,10 +33,49 @@ public class VonoroiDebugger : MonoBehaviour {
     }
 
     public static void ShowBoundaries(List<Boundary> boundaries) {
-        foreach(Boundary b in boundaries) {
-            if(b?.Base?.x == null || b?.Base?.y == null) continue;
-            if(b?.Summit?.x == null || b?.Summit?.y == null) continue;
-            Debug.DrawLine(new Vector3(b.Base.x, b.Base.y, 0), new Vector3(b.Summit.x, b.Summit.y, 0), Color.blue, 10000000);
+        foreach(Boundary C in boundaries) {
+            float divY2 = C.LeftSite.y - C.RightSite.y;
+            bool lineIsStraight = Mathf.Approximately(divY2,0);
+
+            float xMin = 0;
+            float xMax = 10000000;
+            float yMin = 0;
+            float yMax = 10000000;
+
+             // (for y = m*x + c)
+            float m = -1;
+            float c = -1;
+            if(!lineIsStraight) {
+                m = -(C.LeftSite.x - C.RightSite.x)/divY2;
+                c = ((C.LeftSite.y + C.RightSite.y) / 2f) - m*((C.RightSite.x + C.LeftSite.x) / 2f);
+            }
+
+            Vector3 start;
+            Vector3 end;
+            Color lineColor = Color.black;
+
+            // Setting the startpoint
+            if(C.Base?.x != null) {
+                start = start = new Vector3(C.Base.x, C.Base.y, 0);
+                lineColor = Color.blue;
+            } else if(lineIsStraight) { 
+                start = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f,yMin, 0);
+            } else { 
+                start = new Vector3(xMin, m*xMin + c, 0); 
+            }
+
+            // Setting the endpoint
+            if(C.Summit?.x != null) { 
+                end = new Vector3(C.Summit.x, C.Summit.y, 0); 
+                if(lineColor == Color.blue) { lineColor = Color.green; }
+                else { lineColor = Color.blue; }
+            } else if(lineIsStraight) { 
+                end = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f, yMax, 0);
+            } else { 
+                end = new Vector3(xMax, m*xMax + c, 0); 
+            }
+
+            Debug.DrawLine(start, end, lineColor, float.MaxValue); 
         }
     }
 
@@ -43,7 +83,11 @@ public class VonoroiDebugger : MonoBehaviour {
         foreach(BorderInit b in borders) {
             if(b?.CoordBase?.x == null || b?.CoordBase?.y == null) continue;
             if(b?.CoordSummit?.x == null || b?.CoordSummit?.y == null) continue;
-            Debug.DrawLine(new Vector3(b.CoordBase.x, b.CoordBase.y, 0), new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0), Color.red, 10000000);
+
+            Vector3 start = new Vector3(b.CoordBase.x, b.CoordBase.y, 0);
+            Vector3 end = new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0);
+
+            Debug.DrawLine(start, end, Color.red, float.MaxValue);
         }
     }
 
@@ -69,6 +113,7 @@ public class VonoroiDebugger : MonoBehaviour {
             else {
                 Debug.Log("Next step");
                 step(Q, T);
+                ShowBoundaries(T.OfType<Boundary>().ToList());
                 ShowBoundaries(V);
             }
         }
