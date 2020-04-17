@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using FortunesAlgoritmGeometry; //TODO: GET RID OF ME
 
 public class VonoroiController : MonoBehaviour
 {    
@@ -22,7 +21,13 @@ public class VonoroiController : MonoBehaviour
             model.bounds,
             model.amountTiles,
             model.minDistanceTiles);
-        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
+
+        // DEBUGGER
+        VonoroiDebugger.ShowCoordinates(tileCoordinates); // TODO remove this
+        VonoroiDebugger debugger = gameObject.GetComponent<VonoroiDebugger>(); // TODO and this
+
+        
+        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates, debugger);
 
         // IMPROVE
         algorithm.RemoveShortBoundaries(model.minBoundaryLength);

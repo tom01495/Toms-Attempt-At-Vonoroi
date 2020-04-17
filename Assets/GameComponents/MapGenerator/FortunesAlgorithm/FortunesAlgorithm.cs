@@ -9,12 +9,12 @@ using UnityEngine;
 public class FortunesAlgorithm {
     private List<Boundary> V;
     private List<Region> A;
+    private VonoroiDebugger debugger; // TODO also delete this
 
-    public FortunesAlgorithm(List<Coordinates> siteCoordinates) {
+    public FortunesAlgorithm(List<Coordinates> siteCoordinates, VonoroiDebugger debugger) { // TODO and the fact that it asks for the debugger
         V = new List<Boundary>();
         A = new List<Region>();
-
-        VonoroiDebugger.ShowCoordinates(siteCoordinates); // TODO remove
+        this.debugger = debugger;
 
         List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
@@ -27,21 +27,25 @@ public class FortunesAlgorithm {
         List<Point> Q = InitialQ(initialSites, S);
         List<PointSet> T = InitialT(initialSites);
 
-        while(Q.Any()) {
-            Point p = DeleteMax(Q);
+        debugger.StepByStep((Q_, T_) => { FortunesAlgorithmStep(Q_, T_); }, Q, T, V); // TODO delete this
 
-            if(p.GetType()==typeof(Site)) {
-                SiteEvent((Site)p, Q, T);
-            }
-            else if(p.GetType()==typeof(Vertex)) {
-                CircleEvent((Vertex)p, Q, T);
-            }
+        // while(Q.Any()) { 
+        //     FortunesAlgorithmStep(Q, T);
+        // }
 
-            VonoroiDebugger.ShowBoundaries(V); // TODO remove
+        // foreach(Boundary C in T.OfType<Boundary>()) {
+        //     AddIfNotInList(V, C.Normal());
+        // }
+    }
+
+    private void FortunesAlgorithmStep(List<Point> Q, List<PointSet> T) {
+        Point p = DeleteMax(Q);
+
+        if(p.GetType()==typeof(Site)) {
+            SiteEvent((Site)p, Q, T);
         }
-
-        foreach(Boundary C in T.OfType<Boundary>()) {
-            AddIfNotInList(V, C.Normal());
+        else if(p.GetType()==typeof(Vertex)) {
+            CircleEvent((Vertex)p, Q, T);
         }
     }
 

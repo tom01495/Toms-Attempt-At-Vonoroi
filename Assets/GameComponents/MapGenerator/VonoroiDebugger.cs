@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using FortunesAlgoritmGeometry;
 using UnityEngine;
 
+// For all your testing needs. Go wild on this class! (but try to keep the others as in-piece as possible)
 public class VonoroiDebugger : MonoBehaviour {
 
     public static void ShowCoordinates(List<Coordinates> tileCoordinates) {
@@ -42,6 +44,33 @@ public class VonoroiDebugger : MonoBehaviour {
             if(b?.CoordBase?.x == null || b?.CoordBase?.y == null) continue;
             if(b?.CoordSummit?.x == null || b?.CoordSummit?.y == null) continue;
             Debug.DrawLine(new Vector3(b.CoordBase.x, b.CoordBase.y, 0), new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0), Color.red, 10000000);
+        }
+    }
+
+    // ================================== Step By Step
+
+    private Action<List<Point>, List<PointSet>> step;
+    private List<Point> Q;
+    private List<PointSet> T;
+    private List<Boundary> V;
+
+    public void StepByStep(Action<List<Point>, List<PointSet>> step, List<Point> Q, List<PointSet> T, List<Boundary> V){
+        this.step = step;
+        this.Q = Q;
+        this.T = T;
+        this.V = V;
+    }
+
+    private void Update() {
+        if(Input.GetKeyDown(KeyCode.Period) && step != null) {
+            if(Q.Count == 0) {
+                Debug.Log("Q is empty!"); 
+            }
+            else {
+                Debug.Log("Next step");
+                step(Q, T);
+                ShowBoundaries(V);
+            }
         }
     }
 }
