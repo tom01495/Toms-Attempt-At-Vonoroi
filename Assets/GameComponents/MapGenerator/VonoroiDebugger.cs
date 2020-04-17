@@ -55,24 +55,25 @@ public class VonoroiDebugger : MonoBehaviour {
             Color lineColor = Color.black;
 
             // Setting the startpoint
-            if(C.Base?.x != null) {
-                start = start = new Vector3(C.Base.x, C.Base.y, 0);
-                lineColor = Color.blue;
-            } else if(lineIsStraight) { 
+            if(lineIsStraight) { 
                 start = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f,yMin, 0);
             } else { 
                 start = new Vector3(xMin, m*xMin + c, 0); 
             }
 
             // Setting the endpoint
-            if(C.Summit?.x != null) { 
-                end = new Vector3(C.Summit.x, C.Summit.y, 0); 
-                if(lineColor == Color.blue) { lineColor = Color.green; }
-                else { lineColor = Color.blue; }
-            } else if(lineIsStraight) { 
+            if(lineIsStraight) { 
                 end = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f, yMax, 0);
             } else { 
                 end = new Vector3(xMax, m*xMax + c, 0); 
+            }
+
+            if(C.Base?.x != null) { lineColor = Color.blue; }
+            if(C.Summit?.x != null) { lineColor = Color.cyan; }
+            if(C.Base?.x != null && C.Summit?.x != null) {
+                lineColor = Color.green;
+                start = new Vector3(C.Base.x, C.Base.y, 0);
+                end = new Vector3(C.Summit.x, C.Summit.y, 0); 
             }
 
             Debug.DrawLine(start, end, lineColor, float.MaxValue); 
@@ -112,6 +113,9 @@ public class VonoroiDebugger : MonoBehaviour {
             }
             else {
                 Debug.Log("Next step");
+                String insideQ = "Q = {";
+                Q.ForEach(p => insideQ += p.ToString());
+                Debug.Log(insideQ + "}");
                 step(Q, T);
                 ShowBoundaries(T.OfType<Boundary>().ToList());
                 ShowBoundaries(V);

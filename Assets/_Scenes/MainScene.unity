@@ -248,7 +248,7 @@ MonoBehaviour:
   yMin: 0
   xMax: 1000
   yMax: 1000
-  amountTiles: 10
+  amountTiles: 3
   minDistanceTiles: 5
   minBoundaryLength: 100
 --- !u!114 &519420035
