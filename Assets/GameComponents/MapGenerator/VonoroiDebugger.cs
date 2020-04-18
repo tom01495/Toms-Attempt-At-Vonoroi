@@ -32,14 +32,14 @@ public class VonoroiDebugger : MonoBehaviour {
         }
     }
 
-    public static void ShowBoundaries(List<Boundary> boundaries) {
+    public static void ShowBoundaries(List<Boundary> boundaries, float duration) {
         foreach(Boundary C in boundaries) {
             float divY2 = C.LeftSite.y - C.RightSite.y;
             bool lineIsStraight = Mathf.Approximately(divY2,0);
 
-            float xMin = 0;
+            float xMin = -10000000;
             float xMax = 10000000;
-            float yMin = 0;
+            float yMin = -10000000;
             float yMax = 10000000;
 
              // (for y = m*x + c)
@@ -86,11 +86,11 @@ public class VonoroiDebugger : MonoBehaviour {
                 else { end = summit; }
             }
 
-            Debug.DrawLine(start, end, lineColor, float.MaxValue); 
+            Debug.DrawLine(start, end, lineColor, duration); 
         }
     }
 
-    public static void ShowBorders(List<BorderInit> borders) {
+    public static void ShowBorders(List<BorderInit> borders, float duration) {
         foreach(BorderInit b in borders) {
             if(b?.CoordBase?.x == null || b?.CoordBase?.y == null) continue;
             if(b?.CoordSummit?.x == null || b?.CoordSummit?.y == null) continue;
@@ -98,7 +98,7 @@ public class VonoroiDebugger : MonoBehaviour {
             Vector3 start = new Vector3(b.CoordBase.x, b.CoordBase.y, 0);
             Vector3 end = new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0);
 
-            Debug.DrawLine(start, end, Color.red, float.MaxValue);
+            Debug.DrawLine(start, end, Color.red, duration);
         }
     }
 
@@ -116,20 +116,22 @@ public class VonoroiDebugger : MonoBehaviour {
         this.V = V;
     }
 
-    private void Update() {
-        if(Input.GetKeyDown(KeyCode.Period) && step != null) {
-            if(Q.Count == 0) {
-                Debug.Log("Q is empty!"); 
+    private void FixedUpdate() {
+        if(step != null) {
+            if(Input.GetKeyDown(KeyCode.Period)) {
+                if(Q.Count == 0) {
+                    Debug.Log("Q is empty!"); 
+                }
+                else {
+                    Debug.Log("Next step");
+                    String insideQ = "Q = {";
+                    Q.ForEach(p => insideQ += p.ToString());
+                    Debug.Log(insideQ + "}");
+                    step(Q, T);
+                }
             }
-            else {
-                Debug.Log("Next step");
-                String insideQ = "Q = {";
-                Q.ForEach(p => insideQ += p.ToString());
-                Debug.Log(insideQ + "}");
-                step(Q, T);
-                ShowBoundaries(T.OfType<Boundary>().ToList());
-                ShowBoundaries(V);
-            }
+            ShowBoundaries(T.OfType<Boundary>().ToList(), Time.deltaTime);
+            ShowBoundaries(V, Time.deltaTime);
         }
     }
 }
