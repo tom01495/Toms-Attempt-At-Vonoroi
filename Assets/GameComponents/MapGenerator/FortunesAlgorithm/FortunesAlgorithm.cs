@@ -9,10 +9,12 @@ using UnityEngine;
 public class FortunesAlgorithm {
     private List<Boundary> V;
     private List<Region> A;
+    private VonoroiDebugger debugger; // TODO also delete this
 
-    public FortunesAlgorithm(List<Coordinates> siteCoordinates) {
+    public FortunesAlgorithm(List<Coordinates> siteCoordinates, VonoroiDebugger debugger) { // TODO and the fact that it asks for the debugger
         V = new List<Boundary>();
         A = new List<Region>();
+        this.debugger = debugger;
 
         List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
@@ -25,19 +27,25 @@ public class FortunesAlgorithm {
         List<Point> Q = InitialQ(initialSites, S);
         List<PointSet> T = InitialT(initialSites);
 
-        while(Q.Any()) {
-            Point p = DeleteMax(Q);
+        debugger.StepByStep((Q_, T_) => { FortunesAlgorithmStep(Q_, T_); }, Q, T, V); // TODO delete this
 
-            if(p.GetType()==typeof(Site)) {
-                SiteEvent((Site)p, Q, T);
-            }
-            else if(p.GetType()==typeof(Vertex)) {
-                CircleEvent((Vertex)p, Q, T);
-            }
+        // while(Q.Any()) { 
+        //     FortunesAlgorithmStep(Q, T);
+        // }
+
+        // foreach(Boundary C in T.OfType<Boundary>()) {
+        //     AddIfNotInList(V, C.Normal());
+        // }
+    }
+
+    private void FortunesAlgorithmStep(List<Point> Q, List<PointSet> T) {
+        Point p = DeleteMax(Q);
+
+        if(p.GetType()==typeof(Site)) {
+            SiteEvent((Site)p, Q, T);
         }
-
-        foreach(Boundary C in T.OfType<Boundary>()) {
-            AddIfNotInList(V, C.Normal());
+        else if(p.GetType()==typeof(Vertex)) {
+            CircleEvent((Vertex)p, Q, T);
         }
     }
 
@@ -49,8 +57,8 @@ public class FortunesAlgorithm {
         Boundary Crq; //Boundary?
         Boundary Cqs; //Boundary?
 
-        (Rq, index, Crq, Cqs) = FindRegion(p, T);
-        Site q = Rq.site;
+        (Rq, index, Crq, Cqs) = FindRegion(p, T); //Find region under p
+        Site q = Rq.Site;
 
         Boundary Cpq = new Boundary(p, q);
 
@@ -67,11 +75,26 @@ public class FortunesAlgorithm {
         Boundary Crq = null; //Boundary?
         Boundary Cqs = null; //Boundary?
 
-        int index = T.IndexOf(Rq);
+        int index = IndexOfRegion(T.OfType<Region>().ToList(), Rq, p); // TODO THIS IS WHERE IT GOES WRONG!! OBVIOSUIOJIPOLY!
         if(index > 0) { Crq = T[index-1] as Boundary; }
         if(index < T.Count - 1) { Cqs = T[index+1] as Boundary; }
 
         return (Rq, index, Crq, Cqs);
+    }
+
+    private static int IndexOfRegion(List<Region> regions, Region Rq, Site p) {
+        for(int index = 0; index < regions.Count; index++) {
+            if(regions[index] == Rq) {
+                if(index > 0) {
+                    if(regions[index-1].Site.x > p.x) break;
+                }
+                if(index < regions.Count - 1) {
+                    if(regions[index+1].Site.x < p.x) continue;
+                }
+                return index;
+            }
+        }
+        throw new Exception("Region not found!");
     }
 
     // ================================== Circle Event
@@ -95,12 +118,12 @@ public class FortunesAlgorithm {
         T.RemoveRange(index, 3);
         T.Insert(index, Cqs);
 
+        CloseVertex(p, Cqr, Crs, Cqs);
+
         if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
         if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
         if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); }
         if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
-
-        CloseVertex(p, Cqr, Crs, Cqs);
     }
 
     private (Boundary, Boundary, int, Boundary, Boundary) FindIntersection(Vertex p, List<PointSet> T) { //Boundary? Cuq, Boundary? Csv
@@ -110,10 +133,21 @@ public class FortunesAlgorithm {
         Boundary Csv = null; //Boundary?
 
         int index = IndexOfBoundary(T, Cqr);
+        // if(!Crs.Equals(T[index+2])){ // this hasnt happend at all in a long time. I think this is just fixed
+        //     throw new Exception("Incorrect Boundaries in FindIntersection");
+        // }
         if(index > 1) { Cuq = T[index-2] as Boundary; }
         if(index < T.Count - 4) { Csv = T[index+4] as Boundary; }
 
         return (Cqr, Crs, index, Cuq, Csv);
+    }
+
+    private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
+        for(int index = 0; index < T.Count; index++) {
+            Boundary elem = T[index] as Boundary;
+            if(elem != null && C.Equals(elem)) { return index; }
+        }
+        throw new Exception("Border not found!");
     }
 
     private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
@@ -140,13 +174,6 @@ public class FortunesAlgorithm {
 
     private static void AddIfNotInList<T>(List<T> L, T e) {
         if(!L.Contains(e)) L.Add(e);
-    }
-
-    private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
-        for(int index = 0; index < T.Count; index++) {
-            if(C.Equals(T[index])) return index;
-        }
-        throw new Exception("Border not found!");
     }
 
     // ================================== Initiating Functions

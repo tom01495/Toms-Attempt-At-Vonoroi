@@ -7,33 +7,49 @@ using UnityEngine;
 // THIS NAMESPACE SHOULD ONLY BE USED BY THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry {
     public class Boundary : PointSet {
-        private Site higherSite;
-        public Site LeftSite { get { return NormalOrientation() ? normal.higherSite : normal.lowerSite; } }
-        private Site lowerSite;
-        public Site RightSite { get { return NormalOrientation() ? normal.lowerSite : normal.higherSite ; } }
+        protected class BoundaryData {
+            private Site higher;
+            public Site higherSite { get { return higher; } }
+            private Site lower;
+            public Site lowerSite { get { return lower; } }
+            public Vertex summit; //Vertex?
+            public Vertex base_; //Vertex?
 
-        private Vertex summit; //Vertex?
-        public Vertex Summit { get { return normal.summit; } set { normal.summit = value; } }
-        private Vertex base_; //Vertex?
-        public Vertex Base { get { return normal.base_; } set { normal.base_ = value; } }
+            public BoundaryData(Site leftSite, Site rightSite) {
+                bool leftIsHigher = leftSite.CompareTo(rightSite) >= 0;
+                if(leftIsHigher) {
+                    higher = leftSite;
+                    lower = rightSite;
+                } else {
+                    higher = rightSite;
+                    lower = leftSite;
+                }
+            }
+        }
 
-        protected Boundary normal;
+        public virtual Site LeftSite { get { return data.higherSite; } }
+        public virtual Site RightSite { get { return data.lowerSite; } }
+
+        public Vertex Base { 
+            get { return data.base_; } 
+            set { data.base_ = value; } } // start of the line
+        public Vertex Summit { 
+            get { return data.summit; } 
+            set { if(data.summit == null) data.summit = value;
+                  else data.base_ = value; } } // end of the line
+
+        protected BoundaryData data;
 
         // =============================== Constructors
 
         public Boundary(Site leftSite, Site rightSite) {
-            bool isHigher = leftSite.CompareTo(rightSite) >= 0;
-            if(isHigher) {
-                this.higherSite = leftSite;
-                this.lowerSite = rightSite;
-            } else {
-                this.higherSite = rightSite;
-                this.lowerSite = leftSite;
-            }
-            this.normal = this; 
+            data = new BoundaryData(leftSite, rightSite);
+            leftSite.neighbouringSites.Add(rightSite);
+            rightSite.neighbouringSites.Add(leftSite);
         }
-        protected Boundary(Boundary b) { 
-            this.normal = b.normal;
+
+        protected Boundary(Boundary b) {
+            this.data = b.data;
         }
 
         // =============================== Intersection
@@ -49,105 +65,114 @@ namespace FortunesAlgoritmGeometry {
             float c1 = -1;
             if(!line1isStraight) {
                 m1 = -(LeftSite.x - RightSite.x)/divY1;
-                c1 = LeftSite.y - m1*RightSite.x;
+                c1 = ((LeftSite.y + RightSite.y) / 2f) - m1*((RightSite.x + LeftSite.x) / 2f);
             }
             float m2 = -1;
             float c2 = -1;
             if(!line2isStraight) {
                 m2 = -(C.LeftSite.x - C.RightSite.x)/divY2;
-                c2 = C.LeftSite.y - m2*C.RightSite.x;
+                c2 = ((C.LeftSite.y + C.RightSite.y) / 2f) - m2*((C.RightSite.x + C.LeftSite.x) / 2f);
             }
 
             // Step 2: Intersection of the two lines
             if(!Mathf.Approximately(m1,m2)) {
                 float x;
                 float y;
-                
+
                 if(line1isStraight) {
-                    x = LeftSite.x;
-                    y = m2*LeftSite.x + c2;
+                    x = (RightSite.x + LeftSite.x) /2f;
+                    y = m2*x + c2;
                 } else if (line2isStraight) {
-                    x = C.LeftSite.x;
-                    y = m1*C.LeftSite.x + c1;
+                    x = (C.RightSite.x + C.LeftSite.x) / 2f;
+                    y = m1*x + c1;
                 } else {
                     x = (c2 - c1)/(m1 - m2);
                     y = (m1*c2 - m2*c1)/(m1 - m2);
                 }
 
-                Vertex v = new Vertex(x, y, this, C); // TODO
+                (Boundary leftBoundary, Boundary rightBoundary) = sortLeftAndRight(this, C);
+                Vertex v = new Vertex(x, y, leftBoundary, rightBoundary);
                 return IsOnLine(v)? v : null;
             }
             return null; // They are parallel
         }
 
+        private static (Boundary, Boundary) sortLeftAndRight(Boundary C1, Boundary C2) {
+            if(C1.RightSite.Equals(C2.LeftSite)) { return (C1, C2); }
+            else if(C2.RightSite.Equals(C1.LeftSite)) { return (C2, C1); }
+            else throw new Exception("Boundaries are not neighbours!");
+        }
+
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
-            if(p.GetType()==typeof(Vertex)) {
+            if(typeof(Vertex).IsInstanceOfType(p)) {
                 Vertex v = (Vertex)p;
                 return v.LeftBoundary == C1 && v.RightBoundary == C2;
             }
             return false;
         }
 
-        // =============================== Overrides 
+        // =============================== Overrides
 
         public override bool Equals(object obj) {
             if(typeof(Boundary).IsInstanceOfType(obj)) {
-                return GetHashCode() == obj.GetHashCode();
-                //Boundary other = ((Boundary)obj);
-                //return other.LeftSite.Equals(LeftSite) && other.RightSite.Equals(RightSite);
+                Boundary b = obj as Boundary;
+                return LeftSite.Equals(b.LeftSite) && RightSite.Equals(b.RightSite);
             }
             return false;
         }
 
-        public override int GetHashCode() {
-            int hashCode = -877617570;
-            hashCode = hashCode * -1521134295 + EqualityComparer<Site>.Default.GetHashCode(LeftSite);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Site>.Default.GetHashCode(RightSite);
-            return hashCode;
+        //Maybe make a function called "bool SameModel(Boundary C)" instead?
+        public static bool operator != (Boundary a, Boundary b) =>  !(a == b);
+        public static bool operator == (Boundary a, Boundary b) => a?.data == b?.data;
+
+        public override string ToString() {
+            return LeftSite.ToString() + RightSite.ToString();
         }
-        
+
+        public override int GetHashCode() {
+            return data.GetHashCode();
+        }
+
         // =============================== Conversion
 
         protected virtual bool IsOnLine(Point p) => true;
-        protected virtual bool NormalOrientation() =>  true;
 
         public UnsetBorderInit CreateUnsetBorder() {
-            if(Base == null || Summit == null) throw new Exception("Base/Summit not set!");
+            if(Base == null || Summit == null) return null; //throw new Exception("Base/Summit not set!");
             return new UnsetBorderInit(LeftSite, RightSite, Base, Summit);
         }
         public BoundaryNeg Neg() => new BoundaryNeg(this);
         public BoundaryPos Pos() => new BoundaryPos(this);
         public BoundaryZero Zero() => new BoundaryZero(this);
-        public Boundary Normal() => normal;
+        public Boundary Normal() => new Boundary(this);
     }
 
     public class BoundaryNeg : Boundary { // goes <= that way
         public BoundaryNeg(Boundary b) : base(b) {}
 
-        protected override bool NormalOrientation() => true;
+        public override Site LeftSite { get {return data.higherSite;} }
+        public override Site RightSite { get {return data.lowerSite;} }
 
-        protected override bool IsOnLine(Point p) {
-            Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
-            return p.x < lowestSite.x; 
+        protected override bool IsOnLine(Point p){
+            return (data.base_ != null)? p.x <= data.base_.x :
+                                         p.x <= data.lowerSite.x;
         }
     }
 
     public class BoundaryPos : Boundary { // goes => that way
         public BoundaryPos(Boundary b) : base(b) {}
 
-        protected override bool NormalOrientation() => false;
+        public override Site LeftSite { get {return data.lowerSite;} }
+        public override Site RightSite { get {return data.higherSite;} }
 
-        protected override bool IsOnLine(Point p) {
-            Site lowestSite = LeftSite.y < RightSite.y ? LeftSite : RightSite;
-            return p.x > lowestSite.x;
+        protected override bool IsOnLine(Point p){
+            return (data.base_ != null)? p.x >= data.base_.x :
+                                         p.x >= data.lowerSite.x;
         }
     }
 
     public class BoundaryZero : Boundary { // stays perfectly in the middle
         public BoundaryZero(Boundary b): base(b) {}
-
-        protected override bool NormalOrientation() => true;
-
         protected override bool IsOnLine(Point p) => true;
     }
 }
