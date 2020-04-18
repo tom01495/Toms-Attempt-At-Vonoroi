@@ -29,7 +29,7 @@ public class Coordinates {
     // ================================== Poisson Disc Sampling
 
     // uses http://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph07-poissondisk.pdf & https://www.youtube.com/watch?v=7WcmyxyFO7o 
-    public static List<Coordinates> CreateRandomList(Rect bounds, int amount, float minDistance, int k = 30) {
+    public static List<Coordinates> CreateRandomList(Rect bounds, float minDistance, int amount = int.MaxValue, int k = 30) {
         float cellSize = minDistance/(float)Math.Sqrt(2);
 
         int width = Mathf.CeilToInt(bounds.width/cellSize);
@@ -42,7 +42,10 @@ public class Coordinates {
         activeList.Add(Coordinates.CreateRandom(bounds));
 
         while(outputList.Count < amount) {
-            if(activeList.Count == 0) throw new Exception("Active list got too small too soon! Choose a smaller min distance!");
+            if(activeList.Count == 0) {
+                if(amount == int.MaxValue) break;
+                else throw new Exception("Active list got too small too soon! Choose a smaller min distance!");
+            }
             
             bool candidateAccepted = false;
             int index = UnityEngine.Random.Range(0, activeList.Count);

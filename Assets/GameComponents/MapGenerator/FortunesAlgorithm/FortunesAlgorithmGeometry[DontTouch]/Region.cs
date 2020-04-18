@@ -19,6 +19,10 @@ namespace FortunesAlgoritmGeometry
             Region minRegion = null; 
 
             foreach(Region R in regions) {
+                if((R as RegionSection) != null) {
+                    if(!(R as RegionSection).InSection(p)) continue;
+                }
+
                 float distance = p.Dist(R.Site)/2;
                 float angle = (float)(Math.Tanh((p.x - R.Site.x) / (p.y - R.Site.y)));
                 float len = distance / (float)Math.Cos(angle);

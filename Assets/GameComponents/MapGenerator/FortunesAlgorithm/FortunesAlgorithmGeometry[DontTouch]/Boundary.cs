@@ -12,6 +12,7 @@ namespace FortunesAlgoritmGeometry {
             public Site higherSite { get { return higher; } }
             private Site lower;
             public Site lowerSite { get { return lower; } }
+            
             public Vertex summit; //Vertex?
             public Vertex base_; //Vertex?
 
@@ -46,8 +47,8 @@ namespace FortunesAlgoritmGeometry {
 
         public static Boundary CreateSubtype(Site leftSite, Site rightSite) {
             Boundary boundary = new Boundary(leftSite, rightSite);
-            if(leftSite.CompareTo(rightSite) == 1) { return boundary.Neg(); }
-            else if(leftSite.CompareTo(rightSite) == -1) { return boundary.Pos(); }
+            if(leftSite.y > rightSite.y) { return boundary.Neg(); }
+            else if(leftSite.y < rightSite.y) { return boundary.Pos(); }
             else { return boundary.Zero(); }
         }
 

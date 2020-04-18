@@ -77,23 +77,11 @@ public class FortunesAlgorithm {
         Boundary Crq = null; //Boundary?
         Boundary Cqs = null; //Boundary?
 
-        int index = IndexOfRegion(T, Rq, p);
+        int index = T.IndexOf(Rq);
         if(index > 0) { Crq = T[index-1] as Boundary; }
         if(index < T.Count - 1) { Cqs = T[index+1] as Boundary; }
 
         return (Rq, index, Crq, Cqs);
-    }
-
-    private static int IndexOfRegion(List<PointSet> T, Region Rq, Site p) {
-        for(int index = 0; index < T.Count; index++) {
-            Region R = T[index] as Region;
-            if(R != null && R.Equals(Rq)){
-                if(typeof(RegionSection).IsInstanceOfType(R)) {
-                    if((R as RegionSection).InSection(p)) return index;
-                } else return index;
-            }
-        }
-        throw new Exception("Region not found!");
     }
 
     // ================================== Circle Event

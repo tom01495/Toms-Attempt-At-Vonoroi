@@ -19,7 +19,6 @@ public class VonoroiController : MonoBehaviour
         // INPUT
         List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(
             model.bounds,
-            model.amountTiles,
             model.minDistanceTiles);
 
         // DEBUGGER
