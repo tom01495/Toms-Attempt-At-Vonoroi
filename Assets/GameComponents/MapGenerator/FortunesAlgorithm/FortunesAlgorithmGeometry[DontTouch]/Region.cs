@@ -35,6 +35,21 @@ namespace FortunesAlgoritmGeometry
             return minRegion;
         }
 
+        // =============================== Overrides
+
+        public override bool Equals(object obj) {
+            if(typeof(Region).IsInstanceOfType(obj)) { 
+                return this.Site.Equals((obj as Region).Site); 
+            }
+            return false;
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
+
+        // =============================== Conversion
+
         public UnsetTileInit CreateUnsetTile() {
             return new UnsetTileInit(Site);
         }
@@ -44,15 +59,7 @@ namespace FortunesAlgoritmGeometry
 
         public RegionSection Left(Region regionRight) => new RegionSection(this){xMax = regionRight.Site.x};
         public RegionSection Right(Region regionLeft) => new RegionSection(this){xMin = regionLeft.Site.x};
-
-        public override bool Equals(object obj) {
-            if(typeof(Region).IsInstanceOfType(obj)) { return this.Site.Equals((obj as Region).Site); }
-            return false;
-        }
-
-        public override int GetHashCode() {
-            return base.GetHashCode();
-        }
+        public Region Normal() => new Region(Site);
     }
 
     public class RegionSection : Region {
