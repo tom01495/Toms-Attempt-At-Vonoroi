@@ -116,9 +116,15 @@ public class VonoroiDebugger : MonoBehaviour {
         this.V = V;
     }
 
+    private bool keyPressed = false;
+
+    private void Update() {
+        if(Input.GetKeyDown(KeyCode.Period)) keyPressed = true;
+    }
+
     private void FixedUpdate() {
         if(step != null) {
-            if(Input.GetKeyDown(KeyCode.Period)) {
+            if(keyPressed) {
                 if(Q.Count == 0) {
                     Debug.Log("Q is empty!"); 
                 }
@@ -127,8 +133,10 @@ public class VonoroiDebugger : MonoBehaviour {
                     String insideQ = "Q = {";
                     Q.ForEach(p => insideQ += p.ToString());
                     Debug.Log(insideQ + "}");
+                    
                     step(Q, T);
                 }
+                keyPressed = false;
             }
             ShowBoundaries(T.OfType<Boundary>().ToList(), Time.deltaTime);
             ShowBoundaries(V, Time.deltaTime);

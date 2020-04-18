@@ -10,8 +10,6 @@ namespace FortunesAlgoritmGeometry
         private Site site;
         public Site Site { get { return site; } }
 
-        public List<Region> lowerRegions = new List<Region>();
-
         public Region(Site p) {
             site = p;
         }
@@ -36,5 +34,27 @@ namespace FortunesAlgoritmGeometry
         public UnsetTileInit CreateUnsetTile() {
             return new UnsetTileInit(Site);
         }
+
+        protected float xMin = float.MinValue;
+        protected float xMax = float.MaxValue;
+
+        public RegionSection Left(Region regionRight) => new RegionSection(this){xMax = regionRight.Site.x};
+        public RegionSection Right(Region regionLeft) => new RegionSection(this){xMin = regionLeft.Site.x};
+
+        public override bool Equals(object obj) {
+            if(typeof(Region).IsInstanceOfType(obj)) { return this.Site.Equals((obj as Region).Site); }
+            return false;
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
+    }
+
+    public class RegionSection : Region {
+
+        public RegionSection(Region R) : base(R.Site) {}
+
+        public bool InSection(Point p) => xMin <= p.x && p.x <= xMax;
     }
 }

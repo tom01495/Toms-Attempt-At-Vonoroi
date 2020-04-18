@@ -60,12 +60,12 @@ public class FortunesAlgorithm {
         (Rq, index, Crq, Cqs) = FindRegion(p, T); //Find region under p
         Site q = Rq.Site;
 
+        Region Rp = new Region(p);
         Boundary Cpq = new Boundary(p, q);
 
-        Region Rp = new Region(p);
-        List<PointSet> additionT = new List<PointSet>(){Cpq.Neg(), Rp, Cpq.Pos(), Rq};
-        Rq.lowerRegions.Add(Rp);
-        T.InsertRange(index+1, additionT);
+        T.RemoveAt(index);
+        List<PointSet> additionT = new List<PointSet>() {Rq.Left(Rp), Cpq.Neg(), Rp, Cpq.Pos(), Rq.Right(Rp)};
+        T.InsertRange(index, additionT);
 
         if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
         if(Crq != null) { AddIfNotNull(Q, Crq.Intersection(Cpq.Neg())); }
@@ -86,22 +86,13 @@ public class FortunesAlgorithm {
 
     private static int IndexOfRegion(List<PointSet> T, Region Rq, Site p) {
         for(int index = 0; index < T.Count; index++) {
-            if(typeof(Region).IsInstanceOfType(T[index])){
-                if(T[index] == Rq) {
-                    if(index > 1) {
-                        Region leftRegion = (T[index-2] as Region);
-                        if(Rq.lowerRegions.Contains(leftRegion)) {
-                            if(leftRegion.Site.x > p.x) break;
-                        }
-                    }
-                    if(index < T.Count - 2) {
-                        Region rightRegion = (T[index+2] as Region);
-                        if(Rq.lowerRegions.Contains(rightRegion)) {
-                            if(rightRegion.Site.x < p.x) continue;
-                        }
-                    }
-                    return index;
-                }
+            Region R = T[index] as Region;
+            if(R != null && R.Equals(Rq)){
+
+                // Checking wheter it is the right section of the region
+                if(typeof(RegionSection).IsInstanceOfType(R)) {
+                    if((R as RegionSection).InSection(p)) return index;
+                } else return index;
             }
         }
         throw new Exception("Region not found!");
@@ -143,9 +134,9 @@ public class FortunesAlgorithm {
         Boundary Csv = null; //Boundary?
 
         int index = IndexOfBoundary(T, Cqr);
-        // if(!Crs.Equals(T[index+2])){ // this hasnt happend at all in a long time. I think this is just fixed
-        //     throw new Exception("Incorrect Boundaries in FindIntersection");
-        // }
+        if(!Crs.Equals(T[index+2])){ // this hasnt happend at all in a long time. I think this is just fixed
+            throw new Exception("Incorrect Boundaries in FindIntersection");
+        }
         if(index > 1) { Cuq = T[index-2] as Boundary; }
         if(index < T.Count - 4) { Csv = T[index+4] as Boundary; }
 
