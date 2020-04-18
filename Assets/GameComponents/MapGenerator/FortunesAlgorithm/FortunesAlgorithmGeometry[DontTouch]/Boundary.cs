@@ -24,6 +24,8 @@ namespace FortunesAlgoritmGeometry {
                     higher = rightSite;
                     lower = leftSite;
                 }
+                leftSite.neigbhours.Add(rightSite);
+                rightSite.neigbhours.Add(leftSite);
             }
         }
 
@@ -44,8 +46,6 @@ namespace FortunesAlgoritmGeometry {
 
         public Boundary(Site leftSite, Site rightSite) {
             data = new BoundaryData(leftSite, rightSite);
-            leftSite.neighbouringSites.Add(rightSite);
-            rightSite.neighbouringSites.Add(leftSite);
         }
 
         protected Boundary(Boundary b) {

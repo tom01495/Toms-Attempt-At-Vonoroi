@@ -32,14 +32,14 @@ public class VonoroiDebugger : MonoBehaviour {
         }
     }
 
-    public static void ShowBoundaries(List<Boundary> boundaries) {
+    public static void ShowBoundaries(List<Boundary> boundaries, float duration) {
         foreach(Boundary C in boundaries) {
             float divY2 = C.LeftSite.y - C.RightSite.y;
             bool lineIsStraight = Mathf.Approximately(divY2,0);
 
-            float xMin = 0;
+            float xMin = -10000000;
             float xMax = 10000000;
-            float yMin = 0;
+            float yMin = -10000000;
             float yMax = 10000000;
 
              // (for y = m*x + c)
@@ -54,27 +54,43 @@ public class VonoroiDebugger : MonoBehaviour {
             Vector3 end;
             Color lineColor = Color.black;
 
-            // Setting the startpoint
+            // Setting the startpoint <=
             if(!lineIsStraight) { start = new Vector3(xMin, m*xMin + c, 0); }
             else { start = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f,yMin, 0); }
 
-            // Setting the endpoint
+            // Setting the endpoint =>
             if(!lineIsStraight) { end = new Vector3(xMax, m*xMax + c, 0); }
             else { end = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f, yMax, 0); }
 
-            if(C.Base?.x != null) { lineColor = Color.blue; }
-            if(C.Summit?.x != null) { lineColor = Color.red; }
-            if(C.Base?.x != null && C.Summit?.x != null) {
+            float xMiddle = (C.RightSite.x + C.LeftSite.x) / 2f;
+
+            // Setting the base and summit points
+            if(C.Base?.x != null && C.Summit?.x != null) { // Perfect line
                 lineColor = Color.green;
+
                 start = new Vector3(C.Base.x, C.Base.y, 0);
                 end = new Vector3(C.Summit.x, C.Summit.y, 0); 
             }
+            else if(C.Base?.x != null) { // Only the base is set
+                lineColor = Color.blue;
 
-            Debug.DrawLine(start, end, lineColor, float.MaxValue); 
+                Vector3 base_ = new Vector3(C.Base.x, C.Base.y, 0);
+                if(xMiddle > C.Base.x) { start = base_; }
+                else { end = base_; }
+            }
+            else if(C.Summit?.x != null) { // Only the summit is set
+                lineColor = Color.red;
+
+                Vector3 summit = new Vector3(C.Summit.x, C.Summit.y, 0);
+                if(xMiddle > C.Summit.x) { start = summit; }
+                else { end = summit; }
+            }
+
+            Debug.DrawLine(start, end, lineColor, duration); 
         }
     }
 
-    public static void ShowBorders(List<BorderInit> borders) {
+    public static void ShowBorders(List<BorderInit> borders, float duration) {
         foreach(BorderInit b in borders) {
             if(b?.CoordBase?.x == null || b?.CoordBase?.y == null) continue;
             if(b?.CoordSummit?.x == null || b?.CoordSummit?.y == null) continue;
@@ -82,7 +98,7 @@ public class VonoroiDebugger : MonoBehaviour {
             Vector3 start = new Vector3(b.CoordBase.x, b.CoordBase.y, 0);
             Vector3 end = new Vector3(b.CoordSummit.x, b.CoordSummit.y, 0);
 
-            Debug.DrawLine(start, end, Color.red, float.MaxValue);
+            Debug.DrawLine(start, end, Color.red, duration);
         }
     }
 
@@ -100,20 +116,30 @@ public class VonoroiDebugger : MonoBehaviour {
         this.V = V;
     }
 
+    private bool keyPressed = false;
+
     private void Update() {
-        if(Input.GetKeyDown(KeyCode.Period) && step != null) {
-            if(Q.Count == 0) {
-                Debug.Log("Q is empty!"); 
+        if(Input.GetKeyDown(KeyCode.Period)) keyPressed = true;
+    }
+
+    private void FixedUpdate() {
+        if(step != null) {
+            if(keyPressed) {
+                if(Q.Count == 0) {
+                    Debug.Log("Q is empty!"); 
+                }
+                else {
+                    Debug.Log("Next step");
+                    String insideQ = "Q = {";
+                    Q.ForEach(p => insideQ += p.ToString());
+                    Debug.Log(insideQ + "}");
+                    
+                    step(Q, T);
+                }
+                keyPressed = false;
             }
-            else {
-                Debug.Log("Next step");
-                String insideQ = "Q = {";
-                Q.ForEach(p => insideQ += p.ToString());
-                Debug.Log(insideQ + "}");
-                step(Q, T);
-                ShowBoundaries(T.OfType<Boundary>().ToList());
-                ShowBoundaries(V);
-            }
+            ShowBoundaries(T.OfType<Boundary>().ToList(), Time.deltaTime);
+            ShowBoundaries(V, Time.deltaTime);
         }
     }
 }
