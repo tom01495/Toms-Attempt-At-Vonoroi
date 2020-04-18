@@ -88,8 +88,6 @@ public class FortunesAlgorithm {
         for(int index = 0; index < T.Count; index++) {
             Region R = T[index] as Region;
             if(R != null && R.Equals(Rq)){
-
-                // Checking wheter it is the right section of the region
                 if(typeof(RegionSection).IsInstanceOfType(R)) {
                     if((R as RegionSection).InSection(p)) return index;
                 } else return index;
@@ -111,10 +109,7 @@ public class FortunesAlgorithm {
         Site q = Cqr.LeftSite;
         Site s = Crs.RightSite;
 
-        Boundary Cqs = new Boundary(q, s);
-        if(q.y > s.y) { Cqs = Cqs.Neg(); }
-        else if(q.y < s.y) { Cqs = Cqs.Pos(); }
-        else { Cqs = Cqs.Zero(); }
+        Boundary Cqs = Boundary.CreateSubtype(q, s);
 
         T.RemoveRange(index, 3);
         T.Insert(index, Cqs);

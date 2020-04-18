@@ -44,6 +44,13 @@ namespace FortunesAlgoritmGeometry {
 
         // =============================== Constructors
 
+        public static Boundary CreateSubtype(Site leftSite, Site rightSite) {
+            Boundary boundary = new Boundary(leftSite, rightSite);
+            if(leftSite.CompareTo(rightSite) == 1) { return boundary.Neg(); }
+            else if(leftSite.CompareTo(rightSite) == -1) { return boundary.Pos(); }
+            else { return boundary.Zero(); }
+        }
+
         public Boundary(Site leftSite, Site rightSite) {
             data = new BoundaryData(leftSite, rightSite);
         }
