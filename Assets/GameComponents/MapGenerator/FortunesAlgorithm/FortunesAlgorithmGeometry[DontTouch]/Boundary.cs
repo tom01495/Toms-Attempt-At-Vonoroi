@@ -20,9 +20,13 @@ namespace FortunesAlgoritmGeometry {
                 if(leftIsHigher) {
                     higher = leftSite;
                     lower = rightSite;
+                    leftSite.lowerNeigh.Add(rightSite);
+                    rightSite.higherNeigh.Add(leftSite);
                 } else {
                     higher = rightSite;
                     lower = leftSite;
+                    leftSite.higherNeigh.Add(rightSite);
+                    rightSite.lowerNeigh.Add(leftSite);
                 }
             }
         }
@@ -44,8 +48,6 @@ namespace FortunesAlgoritmGeometry {
 
         public Boundary(Site leftSite, Site rightSite) {
             data = new BoundaryData(leftSite, rightSite);
-            leftSite.neighbouringSites.Add(rightSite);
-            rightSite.neighbouringSites.Add(leftSite);
         }
 
         protected Boundary(Boundary b) {

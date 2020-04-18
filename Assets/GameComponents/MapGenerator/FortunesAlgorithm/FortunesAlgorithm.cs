@@ -75,23 +75,32 @@ public class FortunesAlgorithm {
         Boundary Crq = null; //Boundary?
         Boundary Cqs = null; //Boundary?
 
-        int index = IndexOfRegion(T.OfType<Region>().ToList(), Rq, p); // TODO THIS IS WHERE IT GOES WRONG!! OBVIOSUIOJIPOLY!
+        int index = IndexOfRegion(T, Rq, p);
         if(index > 0) { Crq = T[index-1] as Boundary; }
         if(index < T.Count - 1) { Cqs = T[index+1] as Boundary; }
 
         return (Rq, index, Crq, Cqs);
     }
 
-    private static int IndexOfRegion(List<Region> regions, Region Rq, Site p) {
-        for(int index = 0; index < regions.Count; index++) {
-            if(regions[index] == Rq) {
-                if(index > 0) {
-                    if(regions[index-1].Site.x > p.x) break;
+    private static int IndexOfRegion(List<PointSet> T, Region Rq, Site p) {
+        for(int index = 0; index < T.Count; index++) {
+            if(typeof(Region).IsInstanceOfType(T[index])){
+                if(T[index] == Rq) {
+                    foreach(Site s in Rq.Site.lowerNeigh)
+                    if(index > 1) {
+                        Site leftSite = (T[index-2] as Region).Site;
+                        if(Rq.Site.lowerNeigh.Contains(leftSite)) {
+                            if(leftSite.x > p.x) break;
+                        }
+                    }
+                    if(index < T.Count - 2) {
+                        Site rightSite = (T[index+2] as Region).Site;
+                        if(Rq.Site.lowerNeigh.Contains(rightSite)) {
+                            if(rightSite.x < p.x) continue;
+                        }
+                    }
+                    return index;
                 }
-                if(index < regions.Count - 1) {
-                    if(regions[index+1].Site.x < p.x) continue;
-                }
-                return index;
             }
         }
         throw new Exception("Region not found!");
