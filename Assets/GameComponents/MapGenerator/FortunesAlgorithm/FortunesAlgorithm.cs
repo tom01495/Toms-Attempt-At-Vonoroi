@@ -41,17 +41,14 @@ public class FortunesAlgorithm {
     private void FortunesAlgorithmStep(List<Point> Q, List<PointSet> T) {
         Point p = DeleteMax(Q);
 
-        if(p.GetType()==typeof(Site)) {
-            SiteEvent((Site)p, Q, T);
-        }
-        else if(p.GetType()==typeof(Vertex)) {
-            CircleEvent((Vertex)p, Q, T);
-        }
+        if(p.GetType()==typeof(Site)) { SiteEvent((Site)p, Q, T); }
+        else if(p.GetType()==typeof(Vertex)) { CircleEvent((Vertex)p, Q, T); }
     }
 
     // ================================== Site Event
 
     private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
+        // Step 1: Finding the region & neighbouring boundaries
         Region Rq = Region.InRegion(T.OfType<Region>().ToList(), p);
         Site q = Rq.Site;
 
@@ -62,6 +59,7 @@ public class FortunesAlgorithm {
         if(indexRq > 0) { Crq = T[indexRq-1] as Boundary; }
         if(indexRq < T.Count - 1) { Cqs = T[indexRq+1] as Boundary; }
 
+        // Step 2: Insert new region & boundary
         Region Rp = new Region(p);
         Boundary Cpq = new Boundary(p, q);
 
@@ -69,6 +67,7 @@ public class FortunesAlgorithm {
         List<PointSet> additionT = new List<PointSet>() {Rq.Left(Rp), Cpq.Neg(), Rp, Cpq.Pos(), Rq.Right(Rp)};
         T.InsertRange(indexRq, additionT);
 
+        // Step 3: Add/Remove intersections
         if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
         if(Crq != null) { AddIfNotNull(Q, Crq.Intersection(Cpq.Neg())); }
         if(Cqs != null) { AddIfNotNull(Q, Cpq.Pos().Intersection(Cqs)); }
@@ -77,6 +76,7 @@ public class FortunesAlgorithm {
     // ================================== Circle Event
 
     private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T) {
+        // Step 1: Finding the boundaries & neighbouring boundaries
         Boundary Cqr = p.LeftBoundary;
         Boundary Crs = p.RightBoundary;
         Site q = Cqr.LeftSite;
@@ -89,6 +89,7 @@ public class FortunesAlgorithm {
         if(indexCqr > 1) { Cuq = T[indexCqr-2] as Boundary; }
         if(indexCqr < T.Count - 4) { Csv = T[indexCqr+4] as Boundary; }
 
+        // Step 2: Insert new boundary
         Boundary Cqs = Boundary.CreateSubtype(q, s);
 
         T.RemoveRange(indexCqr, 3);
@@ -96,6 +97,7 @@ public class FortunesAlgorithm {
 
         CloseVertex(p, Cqr, Crs, Cqs);
 
+        // Step 3: Add/Remove intersections
         if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
         if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
         if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); }
@@ -106,8 +108,7 @@ public class FortunesAlgorithm {
         for(int index = 0; index < T.Count; index++) {
             Boundary elem = T[index] as Boundary;
             if(elem != null && C.Equals(elem)) { return index; }
-        }
-        throw new Exception("Border not found!");
+        } throw new Exception("Border not found!");
     }
 
     private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
@@ -174,7 +175,7 @@ public class FortunesAlgorithm {
         return this;
     }
 
-    public FortunesAlgorithm CutCorners(Rect bounds) {
+    public FortunesAlgorithm CutCorners(Rect bounds) { // TODO this algorithm doesnt work because you dont know the orrientation
         // Creates 4 additional semi boundaries, like a box
         // tries to find the closest intersections with boundaries without a summit/base
         // for each of these intersections cuts the semi boundaries in short boundaries on the side
