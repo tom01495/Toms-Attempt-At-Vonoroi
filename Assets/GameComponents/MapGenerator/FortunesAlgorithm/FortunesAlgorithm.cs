@@ -86,7 +86,6 @@ public class FortunesAlgorithm {
         for(int index = 0; index < T.Count; index++) {
             if(typeof(Region).IsInstanceOfType(T[index])){
                 if(T[index] == Rq) {
-                    foreach(Site s in Rq.Site.lowerNeigh)
                     if(index > 1) {
                         Site leftSite = (T[index-2] as Region).Site;
                         if(Rq.Site.lowerNeigh.Contains(leftSite)) {
