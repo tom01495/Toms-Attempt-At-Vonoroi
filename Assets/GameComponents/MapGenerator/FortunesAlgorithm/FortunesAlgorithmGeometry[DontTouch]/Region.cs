@@ -6,7 +6,8 @@ namespace FortunesAlgoritmGeometry
 {
     public interface PointSet {} 
     public class Region : PointSet { // TODO Make sure these can be transformed to tiles!
-        public Site site;
+        private Site site;
+        public Site Site { get { return site; } }
 
         public Region(Site p) {
             site = p;
@@ -17,8 +18,8 @@ namespace FortunesAlgoritmGeometry
             Region minRegion = null; 
 
             foreach(Region R in regions) {
-                float distance = p.Dist(R.site)/2;
-                float angle = (float)(Math.Tanh((p.x - R.site.x) / (p.y - R.site.y)));
+                float distance = p.Dist(R.Site)/2;
+                float angle = (float)(Math.Tanh((p.x - R.Site.x) / (p.y - R.Site.y)));
                 float len = distance / (float)Math.Cos(angle);
                 if(len < minLen) {
                     minLen = len;
@@ -30,7 +31,7 @@ namespace FortunesAlgoritmGeometry
         }
 
         public UnsetTileInit CreateUnsetTile() {
-            return new UnsetTileInit(site);
+            return new UnsetTileInit(Site);
         }
     }
 }

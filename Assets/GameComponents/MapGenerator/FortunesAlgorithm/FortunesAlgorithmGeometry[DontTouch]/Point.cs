@@ -33,6 +33,8 @@ namespace FortunesAlgoritmGeometry
     }
 
     public class Site : Point {
+        public List<Site> neighbouringSites = new List<Site>();
+
         public Site(float x, float y) : base(x, y) {}
     }
 }
