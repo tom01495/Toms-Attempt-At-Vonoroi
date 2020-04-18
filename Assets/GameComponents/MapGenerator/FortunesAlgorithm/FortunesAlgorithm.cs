@@ -62,7 +62,9 @@ public class FortunesAlgorithm {
 
         Boundary Cpq = new Boundary(p, q);
 
-        List<PointSet> additionT = new List<PointSet>(){Cpq.Neg(), new Region(p), Cpq.Pos(), Rq};
+        Region Rp = new Region(p);
+        List<PointSet> additionT = new List<PointSet>(){Cpq.Neg(), Rp, Cpq.Pos(), Rq};
+        Rq.lowerRegions.Add(Rp);
         T.InsertRange(index+1, additionT);
 
         if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
@@ -87,15 +89,15 @@ public class FortunesAlgorithm {
             if(typeof(Region).IsInstanceOfType(T[index])){
                 if(T[index] == Rq) {
                     if(index > 1) {
-                        Site leftSite = (T[index-2] as Region).Site;
-                        if(Rq.Site.lowerNeigh.Contains(leftSite)) {
-                            if(leftSite.x > p.x) break;
+                        Region leftRegion = (T[index-2] as Region);
+                        if(Rq.lowerRegions.Contains(leftRegion)) {
+                            if(leftRegion.Site.x > p.x) break;
                         }
                     }
                     if(index < T.Count - 2) {
-                        Site rightSite = (T[index+2] as Region).Site;
-                        if(Rq.Site.lowerNeigh.Contains(rightSite)) {
-                            if(rightSite.x < p.x) continue;
+                        Region rightRegion = (T[index+2] as Region);
+                        if(Rq.lowerRegions.Contains(rightRegion)) {
+                            if(rightRegion.Site.x < p.x) continue;
                         }
                     }
                     return index;

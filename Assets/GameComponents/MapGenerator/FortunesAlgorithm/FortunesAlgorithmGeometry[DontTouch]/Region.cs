@@ -5,9 +5,12 @@ using System.Collections.Generic;
 namespace FortunesAlgoritmGeometry
 {
     public interface PointSet {} 
+
     public class Region : PointSet { // TODO Make sure these can be transformed to tiles!
         private Site site;
         public Site Site { get { return site; } }
+
+        public List<Region> lowerRegions = new List<Region>();
 
         public Region(Site p) {
             site = p;

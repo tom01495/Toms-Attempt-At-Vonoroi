@@ -20,14 +20,12 @@ namespace FortunesAlgoritmGeometry {
                 if(leftIsHigher) {
                     higher = leftSite;
                     lower = rightSite;
-                    leftSite.lowerNeigh.Add(rightSite);
-                    rightSite.higherNeigh.Add(leftSite);
                 } else {
                     higher = rightSite;
                     lower = leftSite;
-                    leftSite.higherNeigh.Add(rightSite);
-                    rightSite.lowerNeigh.Add(leftSite);
                 }
+                leftSite.neigbhours.Add(rightSite);
+                rightSite.neigbhours.Add(leftSite);
             }
         }
 

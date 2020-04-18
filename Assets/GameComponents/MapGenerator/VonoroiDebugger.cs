@@ -54,20 +54,36 @@ public class VonoroiDebugger : MonoBehaviour {
             Vector3 end;
             Color lineColor = Color.black;
 
-            // Setting the startpoint
+            // Setting the startpoint <=
             if(!lineIsStraight) { start = new Vector3(xMin, m*xMin + c, 0); }
             else { start = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f,yMin, 0); }
 
-            // Setting the endpoint
+            // Setting the endpoint =>
             if(!lineIsStraight) { end = new Vector3(xMax, m*xMax + c, 0); }
             else { end = new Vector3((C.RightSite.x + C.LeftSite.x) / 2f, yMax, 0); }
 
-            if(C.Base?.x != null) { lineColor = Color.blue; }
-            if(C.Summit?.x != null) { lineColor = Color.red; }
-            if(C.Base?.x != null && C.Summit?.x != null) {
+            float xMiddle = (C.RightSite.x + C.LeftSite.x) / 2f;
+
+            // Setting the base and summit points
+            if(C.Base?.x != null && C.Summit?.x != null) { // Perfect line
                 lineColor = Color.green;
+
                 start = new Vector3(C.Base.x, C.Base.y, 0);
                 end = new Vector3(C.Summit.x, C.Summit.y, 0); 
+            }
+            else if(C.Base?.x != null) { // Only the base is set
+                lineColor = Color.blue;
+
+                Vector3 base_ = new Vector3(C.Base.x, C.Base.y, 0);
+                if(xMiddle > C.Base.x) { start = base_; }
+                else { end = base_; }
+            }
+            else if(C.Summit?.x != null) { // Only the summit is set
+                lineColor = Color.red;
+
+                Vector3 summit = new Vector3(C.Summit.x, C.Summit.y, 0);
+                if(xMiddle > C.Summit.x) { start = summit; }
+                else { end = summit; }
             }
 
             Debug.DrawLine(start, end, lineColor, float.MaxValue); 
