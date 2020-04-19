@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // THIS NAMESPACE SHOULD ONLY BE USED By THE ALGORITHM!!!
-namespace FortunesAlgoritmGeometry
-{
-    public class Point : Coordinates, IComparable<Point>
-    {
-        public Point(float x, float y) : base(x, y) {}
+namespace FortunesAlgoritmGeometry {
+    public class Point : Coordinates, IComparable<Point> {
+        protected float y_star;
+
+        public Point(float x, float y) : base(x, y) { y_star = y; }
 
         public float Dist(Point p) {
             return (float)Math.Sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y));
         }
 
         public int CompareTo(Point p) { // A point is lesser if it has a smaller y value
-            if(Mathf.Approximately(y, p.y) && Mathf.Approximately(x, p.x)) return 0;
-            else if (y > p.y || (Mathf.Approximately(y, p.y) && x > p.x)) return 1;
+            if(Mathf.Approximately(y_star, p.y_star) && Mathf.Approximately(x, p.x)) return 0;
+            else if (y_star > p.y_star || (Mathf.Approximately(y_star, p.y_star) && x > p.x)) return 1;
             else return -1;
         }
     }
@@ -29,6 +29,7 @@ namespace FortunesAlgoritmGeometry
         public Vertex(float x, float y, Boundary leftBoundary, Boundary rightBoundary) : base(x, y) {
             this.leftBoundary = leftBoundary;
             this.rightBoundary = rightBoundary;
+            y_star = y - leftBoundary.LeftSite.Dist(this);
         }
     }
 

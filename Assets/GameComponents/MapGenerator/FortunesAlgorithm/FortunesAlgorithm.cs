@@ -58,7 +58,7 @@ public class FortunesAlgorithm {
         Boundary Crq = null; //Boundary?
         Boundary Cqs = null; //Boundary?
 
-        int indexRq = T.IndexOf(Rq);
+        int indexRq = T.FindIndex(r => Rq.Equals(r));
         if(indexRq > 0) { Crq = T[indexRq-1] as Boundary; }
         if(indexRq < T.Count - 1) { Cqs = T[indexRq+1] as Boundary; }
 
@@ -98,7 +98,7 @@ public class FortunesAlgorithm {
 
         if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
         if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
-        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); }
+        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); } // TODO check adding intersection again
         if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
     }
 

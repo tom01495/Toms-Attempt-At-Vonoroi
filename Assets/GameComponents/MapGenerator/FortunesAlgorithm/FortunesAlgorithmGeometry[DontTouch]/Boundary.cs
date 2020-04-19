@@ -100,7 +100,7 @@ namespace FortunesAlgoritmGeometry {
 
                 (Boundary leftBoundary, Boundary rightBoundary) = sortLeftAndRight(this, C);
                 Vertex v = new Vertex(x, y, leftBoundary, rightBoundary);
-                return IsOnLine(v)? v : null;
+                return IsOnLine(v) && C.IsOnLine(v) ? v : null;
             }
             return null; // They are parallel
         }
@@ -162,8 +162,8 @@ namespace FortunesAlgoritmGeometry {
         public override Site RightSite { get {return data.lowerSite;} }
 
         protected override bool IsOnLine(Point p){
-            return (data.base_ != null)? p.x <= data.base_.x :
-                                         p.x <= data.lowerSite.x;
+            return (data.base_ != null)? p.x < data.base_.x :
+                                         p.x < (LeftSite.x + RightSite.x)/2;
         }
     }
 
@@ -174,8 +174,8 @@ namespace FortunesAlgoritmGeometry {
         public override Site RightSite { get {return data.higherSite;} }
 
         protected override bool IsOnLine(Point p){
-            return (data.base_ != null)? p.x >= data.base_.x :
-                                         p.x >= data.lowerSite.x;
+            return (data.base_ != null)? p.x > data.base_.x :
+                                         p.x > (LeftSite.x + RightSite.x)/2;
         }
     }
 

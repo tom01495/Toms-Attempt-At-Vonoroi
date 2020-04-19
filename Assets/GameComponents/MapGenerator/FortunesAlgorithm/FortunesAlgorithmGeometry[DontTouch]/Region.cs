@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 // THIS NAMESPACE SHOULD ONLY BE USED BY THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry
@@ -38,8 +39,9 @@ namespace FortunesAlgoritmGeometry
         // =============================== Overrides
 
         public override bool Equals(object obj) {
-            if(typeof(Region).IsInstanceOfType(obj)) { 
-                return this.Site.Equals((obj as Region).Site); 
+            Region R = obj as Region;
+            if(R != null) { 
+                return Site.Equals(R.Site) && Mathf.Approximately(xMin, R.xMin) && Mathf.Approximately(xMax, R.xMax);
             }
             return false;
         }

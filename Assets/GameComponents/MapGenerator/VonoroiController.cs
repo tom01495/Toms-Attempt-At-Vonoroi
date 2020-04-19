@@ -17,13 +17,12 @@ public class VonoroiController : MonoBehaviour
 
     private void StartFortunesAlgorithm(VonoroiModel model) {
         // INPUT
-        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(
-            model.bounds,
-            model.minDistanceTiles);
+        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
+        //List<Coordinates> tileCoordinates = SavedCoordinates(model);
 
         // DEBUGGER
-        VonoroiDebugger.ShowCoordinates(tileCoordinates); // TODO remove this
         VonoroiDebugger debugger = gameObject.GetComponent<VonoroiDebugger>(); // TODO and this
+        debugger.ShowCoordinates(tileCoordinates);
 
         
         FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates, debugger);
@@ -35,5 +34,30 @@ public class VonoroiController : MonoBehaviour
 
         // OUTPUT
         (model.borderInits, model.tileInits) = algorithm.GetBordersAndTiles();
+    }
+
+    private List<Coordinates> SavedCoordinates(VonoroiModel model, bool getNew = false){
+        List<Coordinates> tileCoordinates;
+        if(getNew) {
+            tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles, 10);
+
+            int length = tileCoordinates.Count;
+            PlayerPrefs.SetInt("length", length);
+            for(int index = 0; index < length; index++) {
+                PlayerPrefs.SetFloat(index + "x", tileCoordinates[index].x);
+                PlayerPrefs.SetFloat(index + "y", tileCoordinates[index].y);
+            }
+        } else {
+            tileCoordinates = new List<Coordinates>();
+
+            int length = PlayerPrefs.GetInt("length");
+            for(int index = 0; index < length; index++) {
+                float x = PlayerPrefs.GetFloat(index + "x");
+                float y = PlayerPrefs.GetFloat(index + "y");
+                tileCoordinates.Add(new Coordinates(x,y));
+            }
+        }
+
+        return tileCoordinates;
     }
 }

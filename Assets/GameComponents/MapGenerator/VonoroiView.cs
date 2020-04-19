@@ -9,12 +9,12 @@ public class VonoroiView : MonoBehaviour
 
     // Start is called before the first frame update
     void Start() {
-        borderObject = new GameObject();
-        lineRenderer = borderObject.AddComponent<LineRenderer>();
-        lineRenderer.startColor = Color.black;
-        lineRenderer.endColor = Color.black;
-        lineRenderer.startWidth = 1;
-        lineRenderer.endWidth = 1;
+        // borderObject = new GameObject();
+        // lineRenderer = borderObject.AddComponent<LineRenderer>();
+        // lineRenderer.startColor = Color.black;
+        // lineRenderer.endColor = Color.black;
+        // lineRenderer.startWidth = 1;
+        // lineRenderer.endWidth = 1;
     }
 
     public void ShowVonoroi(VonoroiModel model) {

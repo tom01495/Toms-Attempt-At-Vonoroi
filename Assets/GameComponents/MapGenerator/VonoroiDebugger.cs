@@ -7,7 +7,7 @@ using UnityEngine;
 // For all your testing needs. Go wild on this class! (but try to keep the others as in-piece as possible)
 public class VonoroiDebugger : MonoBehaviour {
 
-    public static void ShowCoordinates(List<Coordinates> tileCoordinates) {
+    public void ShowCoordinates(List<Coordinates> tileCoordinates) {
         // Vector3 va = new Vector3(0, 0, 0);
         // Vector3 vb = new Vector3(20, 10, 0);
         // Boundary a = new Boundary(new Site(va.x, va.y), new Site(vb.x,vb.y));
@@ -25,22 +25,42 @@ public class VonoroiDebugger : MonoBehaviour {
         // return;
 
         GameObject go = new GameObject();
-        foreach(Coordinates c in tileCoordinates){
+        foreach(Coordinates c in tileCoordinates) {
             GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             obj.transform.position = new Vector3(c.x, c.y, 0);
             obj.transform.parent = go.transform;
+            obj.name = c.ToString();
+            spheres.Add(obj);
         }
     }
+
+    List<GameObject> spheres = new List<GameObject>();
+
+    private void OnDrawGizmos() {
+        foreach(GameObject sphere in spheres) {
+            drawString(sphere.name, sphere.transform.position);
+        }
+    }
+
+    static void drawString(string text, Vector3 worldPos, Color? colour = null) {
+		UnityEditor.Handles.BeginGUI();
+		if (colour.HasValue) GUI.color = colour.Value;
+		var view = UnityEditor.SceneView.currentDrawingSceneView;
+		Vector3 screenPos = view.camera.WorldToScreenPoint(worldPos);
+		Vector2 size = GUI.skin.label.CalcSize(new GUIContent(text));
+		GUI.Label(new Rect(screenPos.x - (size.x / 2), -screenPos.y + view.position.height + 4, size.x, size.y), text);
+		UnityEditor.Handles.EndGUI();
+	}
 
     public static void ShowBoundaries(List<Boundary> boundaries, float duration) {
         foreach(Boundary C in boundaries) {
             float divY2 = C.LeftSite.y - C.RightSite.y;
             bool lineIsStraight = Mathf.Approximately(divY2,0);
 
-            float xMin = -10000000;
-            float xMax = 10000000;
-            float yMin = -10000000;
-            float yMax = 10000000;
+            float xMin = -1000;
+            float xMax = 1000;
+            float yMin = -1000;
+            float yMax = 1000;
 
              // (for y = m*x + c)
             float m = -1;
@@ -73,17 +93,21 @@ public class VonoroiDebugger : MonoBehaviour {
             }
             else if(C.Base?.x != null) { // Only the base is set
                 lineColor = Color.blue;
+                // Gizmos.color = Color.blue;
+                // Gizmos.DrawSphere(new Vector3(C.Base.x, C.Base.y, 0), 2);
 
-                Vector3 base_ = new Vector3(C.Base.x, C.Base.y, 0);
-                if(xMiddle > C.Base.x) { start = base_; }
-                else { end = base_; }
+                // Vector3 base_ = new Vector3(C.Base.x, C.Base.y, 0);
+                // if(xMiddle > C.Base.x) { start = base_; }
+                // else { end = base_; }
             }
             else if(C.Summit?.x != null) { // Only the summit is set
                 lineColor = Color.red;
+                // Gizmos.color = Color.red;
+                // Gizmos.DrawSphere(new Vector3(C.Summit.x, C.Summit.y, 0), 2);
 
-                Vector3 summit = new Vector3(C.Summit.x, C.Summit.y, 0);
-                if(xMiddle > C.Summit.x) { start = summit; }
-                else { end = summit; }
+                // Vector3 summit = new Vector3(C.Summit.x, C.Summit.y, 0);
+                // if(xMiddle > C.Summit.x) { start = summit; }
+                // else { end = summit; }
             }
 
             Debug.DrawLine(start, end, lineColor, duration); 
