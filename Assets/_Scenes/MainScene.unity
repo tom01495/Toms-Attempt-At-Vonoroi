@@ -246,10 +246,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xMin: 0
   yMin: 0
-  xMax: 100
-  yMax: 100
+  xMax: 500
+  yMax: 500
   amountTiles: 10
-  minDistanceTiles: 20
+  minDistanceTiles: 10
   minBoundaryLength: 10
 --- !u!114 &519420035
 MonoBehaviour:

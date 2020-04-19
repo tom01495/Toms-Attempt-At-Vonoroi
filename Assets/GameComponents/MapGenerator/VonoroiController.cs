@@ -17,14 +17,13 @@ public class VonoroiController : MonoBehaviour
 
     private void StartFortunesAlgorithm(VonoroiModel model) {
         // INPUT
-        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
-        //List<Coordinates> tileCoordinates = SavedCoordinates(model);
+        //List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
+        List<Coordinates> tileCoordinates = SavedCoordinates(model);
 
         // DEBUGGER
         VonoroiDebugger debugger = gameObject.GetComponent<VonoroiDebugger>(); // TODO and this
         debugger.ShowCoordinates(tileCoordinates);
 
-        
         FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates, debugger);
 
         // IMPROVE
@@ -36,10 +35,10 @@ public class VonoroiController : MonoBehaviour
         (model.borderInits, model.tileInits) = algorithm.GetBordersAndTiles();
     }
 
-    private List<Coordinates> SavedCoordinates(VonoroiModel model, bool getNew = false){
+    private List<Coordinates> SavedCoordinates(VonoroiModel model, bool getNew = true){
         List<Coordinates> tileCoordinates;
         if(getNew) {
-            tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles, 10);
+            tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
 
             int length = tileCoordinates.Count;
             PlayerPrefs.SetInt("length", length);

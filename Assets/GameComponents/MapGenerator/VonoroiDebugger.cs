@@ -38,7 +38,7 @@ public class VonoroiDebugger : MonoBehaviour {
 
     private void OnDrawGizmos() {
         foreach(GameObject sphere in spheres) {
-            drawString(sphere.name, sphere.transform.position);
+            //drawString(sphere.name, sphere.transform.position);
         }
     }
 
@@ -140,27 +140,20 @@ public class VonoroiDebugger : MonoBehaviour {
         this.V = V;
     }
 
-    private bool keyPressed = false;
-
     private void Update() {
-        if(Input.GetKeyDown(KeyCode.Period)) keyPressed = true;
-    }
-
-    private void FixedUpdate() {
         if(step != null) {
-            if(keyPressed) {
+            if(true) { //Input.GetKey(KeyCode.Period)
                 if(Q.Count == 0) {
-                    Debug.Log("Q is empty!"); 
+                    //Debug.Log("Q is empty!"); 
                 }
                 else {
-                    Debug.Log("Next step");
-                    String insideQ = "Q = {";
-                    Q.ForEach(p => insideQ += p.ToString());
-                    Debug.Log(insideQ + "}");
+                    //Debug.Log("Next step");
+                    //String insideQ = "Q = {";
+                    //Q.ForEach(p => insideQ += p.ToString());
+                    //Debug.Log(insideQ + "}");
                     
                     step(Q, T);
                 }
-                keyPressed = false;
             }
             ShowBoundaries(T.OfType<Boundary>().ToList(), Time.deltaTime);
             ShowBoundaries(V, Time.deltaTime);

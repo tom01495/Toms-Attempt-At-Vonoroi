@@ -163,7 +163,7 @@ namespace FortunesAlgoritmGeometry {
 
         protected override bool IsOnLine(Point p){
             return (data.base_ != null)? p.x < data.base_.x :
-                                         p.x < (LeftSite.x + RightSite.x)/2;
+                                         p.x < data.lowerSite.x; //(LeftSite.x + RightSite.x)/2;
         }
     }
 
@@ -175,7 +175,7 @@ namespace FortunesAlgoritmGeometry {
 
         protected override bool IsOnLine(Point p){
             return (data.base_ != null)? p.x > data.base_.x :
-                                         p.x > (LeftSite.x + RightSite.x)/2;
+                                         p.x > data.lowerSite.x; //(LeftSite.x + RightSite.x)/2;
         }
     }
 
