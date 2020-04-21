@@ -1,25 +1,17 @@
 using System.Collections.Generic;
+using UnityEngine;
 
-// Has all the initial values for the tile to use. Use this for TileController & TileModel!!!
+// Has all the initial values for the tile to use. Use this for TileModel!!!
 public abstract class TileInit {
-    protected Coordinates coordMiddle;
-    public Coordinates CoordMiddle { get { return coordMiddle;} }
+    protected Vector2 middle;
+    public Vector2 Middle { get { return middle; } }
+    public float x { get { return middle.x; } }
+    public float y { get { return middle.y; } }
     
     protected List<BorderInit> borders;
     public List<BorderInit> Borders { get { return borders; }  }
 
     public List<TileInit> NeighbouringTiles() {
         return borders.ConvertAll<TileInit>(b => b.OtherTile(this));
-    }
-}
-
-public class UnsetTileInit : TileInit {
-    public UnsetTileInit(Coordinates coordMiddle) {
-        this.coordMiddle = coordMiddle;
-    }
-
-    public TileInit SetTileInit(List<BorderInit> borders) {
-        this.borders = borders;
-        return (TileInit)this;
     }
 }
