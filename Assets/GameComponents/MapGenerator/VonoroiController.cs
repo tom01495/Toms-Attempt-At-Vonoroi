@@ -11,29 +11,17 @@ public class VonoroiController : MonoBehaviour
 
         //view.ShowLoadingbar() // :p
         StartFortunesAlgorithm(model);
-        //VonoroiDebugger.ShowBorders(model.borderInits);
-        //view.ShowVonoroi(model);
+        view.ShowVonoroi(model);
     }
 
     private void StartFortunesAlgorithm(VonoroiModel model) {
-        // INPUT
-        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(
-            model.bounds,
-            model.minDistanceTiles);
+        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
+        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
 
-        // DEBUGGER
-        VonoroiDebugger.ShowCoordinates(tileCoordinates); // TODO remove this
-        VonoroiDebugger debugger = gameObject.GetComponent<VonoroiDebugger>(); // TODO and this
-
-        
-        FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates, debugger);
-
-        // IMPROVE
         algorithm.RemoveShortBoundaries(model.minBoundaryLength);
         algorithm.MakeBoundariesWiggely();
         algorithm.CutCorners(model.bounds);
 
-        // OUTPUT
         (model.borderInits, model.tileInits) = algorithm.GetBordersAndTiles();
     }
 }

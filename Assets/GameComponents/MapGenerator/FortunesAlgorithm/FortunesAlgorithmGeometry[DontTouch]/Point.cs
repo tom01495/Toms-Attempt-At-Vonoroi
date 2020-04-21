@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // THIS NAMESPACE SHOULD ONLY BE USED By THE ALGORITHM!!!
-namespace FortunesAlgoritmGeometry
-{
-    public class Point : Coordinates, IComparable<Point>
-    {
-        public Point(float x, float y) : base(x, y) {}
+namespace FortunesAlgoritmGeometry {
+    public class Point : Coordinates, IComparable<Point> {
+        protected float y_star;
+
+        public Point(float x, float y) : base(x, y) { y_star = y; }
 
         public float Dist(Point p) {
             return (float)Math.Sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y));
         }
 
         public int CompareTo(Point p) { // A point is lesser if it has a smaller y value
-            if(Mathf.Approximately(y, p.y) && Mathf.Approximately(x, p.x)) return 0;
-            else if (y > p.y || (Mathf.Approximately(y, p.y) && x > p.x)) return 1;
+            if(Mathf.Approximately(y_star, p.y_star) && Mathf.Approximately(x, p.x)) return 0;
+            else if (y_star > p.y_star || (Mathf.Approximately(y_star, p.y_star) && x > p.x)) return 1;
             else return -1;
         }
     }
@@ -25,30 +25,55 @@ namespace FortunesAlgoritmGeometry
         public Boundary LeftBoundary { get { return leftBoundary; } }
         private Boundary rightBoundary;
         public Boundary RightBoundary { get { return rightBoundary; } }
+        private Boundary outgoingBoundary;
+        public Boundary OutgoingBoundary { get { return outgoingBoundary; } set { if(outgoingBoundary == null) outgoingBoundary = value; }}
 
         public Vertex(float x, float y, Boundary leftBoundary, Boundary rightBoundary) : base(x, y) {
             this.leftBoundary = leftBoundary;
             this.rightBoundary = rightBoundary;
+            y_star = y - leftBoundary.LeftSite.Dist(this);
+        }
+
+        public List<Boundary> OtherBoundaries(int hash) {
+            if(hash == leftBoundary.GetHashCode()) return new List<Boundary>(){ rightBoundary, outgoingBoundary };
+            if(hash == rightBoundary.GetHashCode()) return new List<Boundary>(){ leftBoundary, outgoingBoundary };
+            if(hash == outgoingBoundary.GetHashCode()) return new List<Boundary>(){ leftBoundary, rightBoundary };
+            else throw new Exception("Hash doesnt match one of the boundaries!");
         }
     }
 
     public class Site : Point {
-        public List<Site> neigbhours = new List<Site>();
+        public List<Site> neighbours = new List<Site>();
+        public List<Boundary> boundaries = new List<Boundary>();
         
         public Site(float x, float y) : base(x, y) {}
+
+        public UnsetTileInit CreateUnsetTile() => new UnsetTileInit(this);
+    }
+
+    // =============================== Only Needed At The End
+
+    public class UnsetTileInit : TileInit {
+        private List<Site> neighbouringSites;
+        public List<Site> Neighbours { get { return neighbouringSites; } }
+        private List<Boundary> boundaries;
+        public List<Boundary> Boundaries { get { return boundaries; } }
+
+        private int hash;
+
+        public UnsetTileInit(Site site) {
+            this.neighbouringSites = site.neighbours;
+            this.boundaries = site.boundaries;
+            this.hash = site.GetHashCode();
+
+            this.middle = site.vector;
+        }
+
+        public override int GetHashCode() => hash;
+
+        public TileInit SetTileInit(List<BorderInit> borders) {
+            this.borders = borders;
+            return (TileInit)this;
+        }
     }
 }
-
-// I have put both of these in the Coord class!!
-
-// public override string ToString(){
-//     return "(" + valueX.ToString() + "," + valueY.ToString() + ")";
-// }
-
-// public override bool Equals(object obj){
-//     if(typeof(Site).IsInstanceOfType(obj)){
-//         Site s = obj as Site;
-//         return Mathf.Approximately(x, s.x) && Mathf.Approximately(y, s.y);
-//     }
-//     return false;
-// }

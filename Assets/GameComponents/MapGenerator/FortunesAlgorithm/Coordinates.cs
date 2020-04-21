@@ -106,11 +106,6 @@ public class Coordinates {
         return false;
     }
 
-    public override int GetHashCode() {
-        return base.GetHashCode();
-    }
-
-    public override string ToString() {
-        return "(" + valueX.ToString() + "|" + valueY.ToString() + ")";
-    }
+    public override string ToString() => "(" + valueX.ToString() + "|" + valueY.ToString() + ")";
+    public override int GetHashCode() => base.GetHashCode();
 }

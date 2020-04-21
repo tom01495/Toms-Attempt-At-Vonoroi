@@ -25,8 +25,8 @@ namespace FortunesAlgoritmGeometry {
                     higher = rightSite;
                     lower = leftSite;
                 }
-                leftSite.neigbhours.Add(rightSite);
-                rightSite.neigbhours.Add(leftSite);
+                leftSite.neighbours.Add(rightSite);
+                rightSite.neighbours.Add(leftSite);
             }
         }
 
@@ -47,18 +47,17 @@ namespace FortunesAlgoritmGeometry {
 
         public static Boundary CreateSubtype(Site leftSite, Site rightSite) {
             Boundary boundary = new Boundary(leftSite, rightSite);
+
             if(leftSite.y > rightSite.y) { return boundary.Neg(); }
             else if(leftSite.y < rightSite.y) { return boundary.Pos(); }
             else { return boundary.Zero(); }
         }
 
-        public Boundary(Site leftSite, Site rightSite) {
-            data = new BoundaryData(leftSite, rightSite);
+        public Boundary(Site leftSite, Site rightSite) { 
+            data = new BoundaryData(leftSite, rightSite); 
         }
 
-        protected Boundary(Boundary b) {
-            this.data = b.data;
-        }
+        protected Boundary(Boundary b) { this.data = b.data; }
 
         // =============================== Intersection
 
@@ -100,15 +99,9 @@ namespace FortunesAlgoritmGeometry {
 
                 (Boundary leftBoundary, Boundary rightBoundary) = sortLeftAndRight(this, C);
                 Vertex v = new Vertex(x, y, leftBoundary, rightBoundary);
-                return IsOnLine(v)? v : null;
+                return IsOnLine(v) && C.IsOnLine(v) ? v : null;
             }
             return null; // They are parallel
-        }
-
-        private static (Boundary, Boundary) sortLeftAndRight(Boundary C1, Boundary C2) {
-            if(C1.RightSite.Equals(C2.LeftSite)) { return (C1, C2); }
-            else if(C2.RightSite.Equals(C1.LeftSite)) { return (C2, C1); }
-            else throw new Exception("Boundaries are not neighbours!");
         }
 
         public static bool IsIntersection(Boundary C1, Boundary C2, Point p) {
@@ -117,6 +110,12 @@ namespace FortunesAlgoritmGeometry {
                 return v.LeftBoundary == C1 && v.RightBoundary == C2;
             }
             return false;
+        }
+
+        private static (Boundary, Boundary) sortLeftAndRight(Boundary C1, Boundary C2) { // Ideally this function wouldnt be needed
+            if(C1.RightSite.Equals(C2.LeftSite)) { return (C1, C2); }
+            else if(C2.RightSite.Equals(C1.LeftSite)) { return (C2, C1); }
+            else throw new Exception("Boundaries are not neighbours!");
         }
 
         // =============================== Overrides
@@ -133,26 +132,22 @@ namespace FortunesAlgoritmGeometry {
         public static bool operator != (Boundary a, Boundary b) =>  !(a == b);
         public static bool operator == (Boundary a, Boundary b) => a?.data == b?.data;
 
-        public override string ToString() {
-            return LeftSite.ToString() + RightSite.ToString();
-        }
-
-        public override int GetHashCode() {
-            return data.GetHashCode();
-        }
+        public override string ToString() => LeftSite.ToString() + RightSite.ToString();
+        public override int GetHashCode() => data.GetHashCode();
 
         // =============================== Conversion
 
         protected virtual bool IsOnLine(Point p) => true;
 
-        public UnsetBorderInit CreateUnsetBorder() {
-            if(Base == null || Summit == null) return null; //throw new Exception("Base/Summit not set!");
-            return new UnsetBorderInit(LeftSite, RightSite, Base, Summit);
-        }
         public BoundaryNeg Neg() => new BoundaryNeg(this);
         public BoundaryPos Pos() => new BoundaryPos(this);
         public BoundaryZero Zero() => new BoundaryZero(this);
         public Boundary Normal() => new Boundary(this);
+
+        public UnsetBorderInit CreateUnsetBorder() {
+            if(LeftSite == null || RightSite == null || Base == null || Summit == null) return null; //throw new Exception("Base/Summit not set!");
+            return new UnsetBorderInit(this);
+        }
     }
 
     public class BoundaryNeg : Boundary { // goes <= that way
@@ -162,8 +157,8 @@ namespace FortunesAlgoritmGeometry {
         public override Site RightSite { get {return data.lowerSite;} }
 
         protected override bool IsOnLine(Point p){
-            return (data.base_ != null)? p.x <= data.base_.x :
-                                         p.x <= data.lowerSite.x;
+            return (data.base_ != null)? p.x < data.base_.x :
+                                         p.x < data.lowerSite.x; //(LeftSite.x + RightSite.x)/2;
         }
     }
 
@@ -174,13 +169,54 @@ namespace FortunesAlgoritmGeometry {
         public override Site RightSite { get {return data.higherSite;} }
 
         protected override bool IsOnLine(Point p){
-            return (data.base_ != null)? p.x >= data.base_.x :
-                                         p.x >= data.lowerSite.x;
+            return (data.base_ != null)? p.x > data.base_.x :
+                                         p.x > data.lowerSite.x; //(LeftSite.x + RightSite.x)/2;
         }
     }
 
     public class BoundaryZero : Boundary { // stays perfectly in the middle
         public BoundaryZero(Boundary b): base(b) {}
         protected override bool IsOnLine(Point p) => true;
+    }
+
+    // =============================== Only Needed At The End
+
+    public class UnsetBorderInit : BorderInit {
+        private Site leftSite;
+        public Site LeftSite { get { return leftSite; } }
+        private Site rightSite;
+        public Site RightSite { get { return rightSite; } }
+
+        private Vertex baseVertex;
+        public Vertex BaseVertex { get { return baseVertex; } }
+        private Vertex summitVertex;
+        public Vertex SummitVertex { get { return summitVertex; } }
+
+        public List<Boundary> BaseNeighbours { get { return BaseVertex.OtherBoundaries(hash); } }
+        public List<Boundary> SummitNeighbours { get { return SummitVertex.OtherBoundaries(hash); } }
+
+        private int hash;
+
+        public UnsetBorderInit(Boundary boundary) {
+            this.leftSite = boundary.LeftSite;
+            this.rightSite = boundary.RightSite;
+            this.baseVertex = boundary.Base;
+            this.summitVertex = boundary.Summit;
+            this.hash = boundary.GetHashCode();
+
+            this.middle = new Vector2((base_.x + summit.x)/2, (base_.y + summit.y)/2);
+        }
+
+        public override int GetHashCode() => hash;
+
+        // =============================== Conversion
+
+        public BorderInit SetBorderInit(TileInit leftTile, TileInit rightTile, List<BorderInit> bordersBase, List<BorderInit> bordersSummit) {
+            this.leftTile = leftTile;
+            this.rightTile = rightTile;
+            this.neighboursBase = bordersBase;
+            this.neighboursSummit = bordersSummit;
+            return (BorderInit)this;
+        }
     }
 }

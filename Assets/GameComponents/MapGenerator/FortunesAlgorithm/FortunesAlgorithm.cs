@@ -8,18 +8,18 @@ using UnityEngine;
 
 public class FortunesAlgorithm {
     private List<Boundary> V;
-    private List<Region> A;
-    private VonoroiDebugger debugger; // TODO also delete this
+    private List<Site> A;
 
-    public FortunesAlgorithm(List<Coordinates> siteCoordinates, VonoroiDebugger debugger) { // TODO and the fact that it asks for the debugger
+    public FortunesAlgorithm(List<Coordinates> siteCoordinates) {
         V = new List<Boundary>();
-        A = new List<Region>();
-        this.debugger = debugger;
+        A = new List<Site>();
 
         List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
 
         FortunesPlaneSweepingAlgorithm(S);
+
+        VonoroiDebugger.ShowBoundaries(V, float.MaxValue); // TODO delete this
     }
 
     private void FortunesPlaneSweepingAlgorithm(List<Site> S) {
@@ -27,26 +27,16 @@ public class FortunesAlgorithm {
         List<Point> Q = InitialQ(initialSites, S);
         List<PointSet> T = InitialT(initialSites);
 
-        debugger.StepByStep((Q_, T_) => { FortunesAlgorithmStep(Q_, T_); }, Q, T, V); // TODO delete this
+        while(Q.Any()) { FortunesAlgorithmStep(Q, T); }
 
-        // while(Q.Any()) { 
-        //     FortunesAlgorithmStep(Q, T);
-        // }
-
-        // foreach(Boundary C in T.OfType<Boundary>()) {
-        //     AddIfNotInList(V, C.Normal());
-        // }
+        foreach(Boundary C in T.OfType<Boundary>()) { AddIfNotInList(V, C.Normal()); }
     }
 
     private void FortunesAlgorithmStep(List<Point> Q, List<PointSet> T) {
         Point p = DeleteMax(Q);
 
-        if(p.GetType()==typeof(Site)) {
-            SiteEvent((Site)p, Q, T);
-        }
-        else if(p.GetType()==typeof(Vertex)) {
-            CircleEvent((Vertex)p, Q, T);
-        }
+        if(typeof(Site).IsInstanceOfType(p)) { SiteEvent((Site)p, Q, T); }
+        else if(typeof(Vertex).IsInstanceOfType(p)) { CircleEvent((Vertex)p, Q, T); }
     }
 
     // ================================== Site Event
@@ -58,7 +48,7 @@ public class FortunesAlgorithm {
         Boundary Crq = null; //Boundary?
         Boundary Cqs = null; //Boundary?
 
-        int indexRq = T.IndexOf(Rq);
+        int indexRq = T.FindIndex(r => Rq.Equals(r));
         if(indexRq > 0) { Crq = T[indexRq-1] as Boundary; }
         if(indexRq < T.Count - 1) { Cqs = T[indexRq+1] as Boundary; }
 
@@ -98,7 +88,7 @@ public class FortunesAlgorithm {
 
         if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
         if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
-        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); }
+        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); } // TODO check adding intersection again
         if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
     }
 
@@ -115,9 +105,11 @@ public class FortunesAlgorithm {
         Cqr.Summit = p;
         Crs.Summit = p;
         Cqs.Base = p;
+        p.OutgoingBoundary = Cqs;
 
         AddIfNotInList(V, Cqr.Normal());
         AddIfNotInList(V, Crs.Normal());
+        A.Add(Cqr.RightSite);
     }
 
     // ================================== Additional Functions (as instructed)
@@ -174,7 +166,7 @@ public class FortunesAlgorithm {
         return this;
     }
 
-    public FortunesAlgorithm CutCorners(Rect bounds) {
+    public FortunesAlgorithm CutCorners(Rect bounds) { //This algorithm doesnt work i think. I think i need to do it in the algorithm itself
         // Creates 4 additional semi boundaries, like a box
         // tries to find the closest intersections with boundaries without a summit/base
         // for each of these intersections cuts the semi boundaries in short boundaries on the side
@@ -193,24 +185,42 @@ public class FortunesAlgorithm {
         foreach(Boundary C in V) {
             borders.Add(C.CreateUnsetBorder());
         }
-        foreach(Region R in A) {
-            tiles.Add(R.CreateUnsetTile());
+        foreach(Site s in A) {
+            tiles.Add(s.CreateUnsetTile());
         }
 
-        // Step 2: Correcting the refrences // TODO not urgent
+        // Step 2: Correcting the refrences
         foreach(UnsetBorderInit b in borders) {
-            //GetBorderFromHash()
-            //b.SetBorderInit();
+            // TileInit leftTile = SearchMatchHash(tiles, b.LeftSite.GetHashCode());
+            // TileInit rightTile = SearchMatchHash(tiles, b.RightSite.GetHashCode());
+            // List<BorderInit> borderBase = SearchMatchesList(borders, b.BaseNeighbours);
+            // List<BorderInit> borderSummit = SearchMatchesList(borders, b.SummitNeighbours);
+
+            // b.SetBorderInit(leftTile, rightTile, borderBase, borderSummit);
         }
         foreach(UnsetTileInit t in tiles) {
-            //t.SetTileInit();
+            //List<BorderInit> tileBorders = SearchMatchesList(borders, t.Boundaries);
+
+            //t.SetTileInit(tileBorders);
         }
 
         return (borders, tiles);
     }
 
-    private List<BorderInit> GetBorderFromHash(int code) {
-        throw new Exception();
+    // TODO improve the lookup times with dictionaries maybe?
+
+    private List<T1> SearchMatchesList<T1, T2>(List<T1> toBeFiltered, List<T2> list) {
+        List<T1> output = new List<T1>();
+        foreach(T2 e in list) {
+            T1 match = SearchMatchHash(toBeFiltered, e.GetHashCode());
+            output.Add(match); 
+        }
+        return output;
+    }
+
+    private T SearchMatchHash<T>(List<T> toBeFiltered, int hash) {
+        foreach(T e in toBeFiltered) { if(e.GetHashCode() == hash) { return e; } }
+        throw new Exception("No match found!");
     }
 }
 
@@ -256,19 +266,4 @@ public class FortunesAlgorithm {
 // output the remaining boundary rays in T
 
 // https://en.wikipedia.org/wiki/Fortune's_algorithm
-
-
-// add a site event in the event queue for each site
-// while the event queue is not empty
-//     pop the top event
-//     if the event is a site event
-//         insert a new arc in the beachline
-//         check for new circle events
-//     else
-//         create a vertex in the diagram
-//         remove the shrunk arc from the beachline
-//         delete invalidated events
-//         check for new circle events
-
-// https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html
 
