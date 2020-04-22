@@ -87,7 +87,7 @@ public class FortunesAlgorithm {
     // ================================== Circle Event
 
     private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T) {
-        // Step 1: Finding the intersection of the two boundaries of the intersection
+        // Step 1: Finding the two boundaries of the intersection
         Boundary Cqr = p.LeftBoundary;
         Boundary Crs = p.RightBoundary;
         Site q = Cqr.LeftSite;
@@ -99,7 +99,7 @@ public class FortunesAlgorithm {
         if(indexCqr > 1) { Cuq = T[indexCqr-2] as Boundary; }
         if(indexCqr < T.Count - 4) { Csv = T[indexCqr+4] as Boundary; }
 
-        // Step 2: Creating a new boundary and cover up in the beachline the boundaries and region from which it starts
+        // Step 2: Creating a new boundary and covering up the boundaries and region from which it starts
         Boundary Cqs = Boundary.CreateSubtype(q, s);
 
         T.RemoveRange(indexCqr, 3);
