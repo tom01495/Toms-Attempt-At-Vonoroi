@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VonoroiController : MonoBehaviour
-{    
+public class MapController : MonoBehaviour {    
     // Start is called before the first frame update
     void Start() {
-        VonoroiModel model = gameObject.GetComponent<VonoroiModel>();
-        VonoroiView view = gameObject.GetComponent<VonoroiView>();
+        MapModel model = gameObject.GetComponent<MapModel>();
+        MapView view = gameObject.GetComponent<MapView>();
 
         //view.ShowLoadingbar() // :p
         StartFortunesAlgorithm(model);
         view.ShowVonoroi(model);
     }
 
-    private void StartFortunesAlgorithm(VonoroiModel model) {
+    private void StartFortunesAlgorithm(MapModel model) {
         List<Vector2> tileCoordinates = PossionDiscSampling.CreateRandomList(model.bounds, model.minDistanceTiles);
         FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
 

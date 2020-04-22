@@ -15,12 +15,12 @@ public class FortunesAlgorithm {
         S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
 
-        FortunesPlaneSweepingAlgorithm();
+        FortunesPlaneSweepingAlgorithm(S, V);
 
         //VonoroiDebugger.ShowBoundaries(V, float.MaxValue); // TODO delete this
     }
 
-    private void FortunesPlaneSweepingAlgorithm() {
+    private static void FortunesPlaneSweepingAlgorithm(List<Site> S, List<Boundary> V) {
         List<Site> initialSites = InitialSites(S);
         List<Point> Q = InitialQ(initialSites, S);
         List<PointSet> T = InitialT(initialSites);
@@ -29,7 +29,7 @@ public class FortunesAlgorithm {
             Point p = DeleteMax(Q);
 
             if(typeof(Site).IsInstanceOfType(p)) { SiteEvent((Site)p, Q, T); }
-            else if(typeof(Vertex).IsInstanceOfType(p)) { CircleEvent((Vertex)p, Q, T); }
+            else if(typeof(Vertex).IsInstanceOfType(p)) { CircleEvent((Vertex)p, Q, T, V); }
         }
 
         foreach(Boundary C in T.OfType<Boundary>()) { AddIfNotInList(V, C.Normal()); }
@@ -46,8 +46,7 @@ public class FortunesAlgorithm {
     }
 
     private static List<PointSet> InitialT(List<Site> initialSites) {
-        List<PointSet> T = new List<PointSet>();
-        T.Add(new Region(initialSites[0]));
+        List<PointSet> T = new List<PointSet>(){ new Region(initialSites[0]) };
 
         for(int i = 1; i < initialSites.Count; i++) {
             T.Add(new Boundary(initialSites[i-1],initialSites[i]).Zero());
@@ -59,7 +58,7 @@ public class FortunesAlgorithm {
 
     // ================================== Site Event
 
-    private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
+    private static void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
         // Step 1: Finding the region above site p
         Region Rq = Region.InRegion(T.OfType<Region>().ToList(), p);
         Site q = Rq.Site;
@@ -86,7 +85,7 @@ public class FortunesAlgorithm {
 
     // ================================== Circle Event
 
-    private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T) {
+    private static void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T, List<Boundary> V) {
         // Step 1: Finding the two boundaries of the intersection
         Boundary Cqr = p.LeftBoundary;
         Boundary Crs = p.RightBoundary;
@@ -105,7 +104,7 @@ public class FortunesAlgorithm {
         T.RemoveRange(indexCqr, 3);
         T.Insert(indexCqr, Cqs);
 
-        CloseVertex(p, Cqr, Crs, Cqs);
+        CloseVertex(p, Cqr, Crs, Cqs, V);
 
         // Step 3: Adding and removing (new) intersections in Q
         if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
@@ -122,7 +121,7 @@ public class FortunesAlgorithm {
         throw new Exception("Border not found!");
     }
 
-    private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
+    private static void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs, List<Boundary> V) {
         Cqr.Summit = p;
         Crs.Summit = p;
         Cqs.Base = p;
@@ -218,13 +217,13 @@ public class FortunesAlgorithm {
         return (borders, tiles);
     }
 
-    private List<T1> SearchDictList<T1, T2>(Dictionary<int, T1> dict, List<T2> list) {
+    private static List<T1> SearchDictList<T1, T2>(Dictionary<int, T1> dict, List<T2> list) {
         List<T1> output = new List<T1>();
         foreach(T2 e in list) output.Add(SearchDict(dict, e));
         return output;
     }
 
-    private T1 SearchDict<T1, T2>(Dictionary<int, T1> dict, T2 e) {
+    private static T1 SearchDict<T1, T2>(Dictionary<int, T1> dict, T2 e) {
         T1 output;
         if(dict.TryGetValue(e.GetHashCode(), out output)) return output;
         else return default(T1);

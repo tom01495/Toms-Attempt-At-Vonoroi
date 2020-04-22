@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Has all the initial values for the border to use. Use this for BorderModel!!!
-public abstract class BorderInit {
+public abstract class BorderInit : MonoBehaviour {
     protected Vector2 middle;
     public Vector2 Middle { get { return middle; } }
     public float x { get { return middle.x; } }

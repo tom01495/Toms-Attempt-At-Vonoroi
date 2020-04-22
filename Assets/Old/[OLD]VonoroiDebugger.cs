@@ -9,7 +9,7 @@ public class VonoroiDebugger : MonoBehaviour {
 
     // ================================== Setters
 
-    private static List<Vector2> SavedCoordinates(VonoroiModel model, bool getNew = false){
+    private static List<Vector2> SavedCoordinates(MapModel model, bool getNew = false){
         List<Vector2> tileCoordinates;
         if(getNew) {
             tileCoordinates = PossionDiscSampling.CreateRandomList(model.bounds, model.minDistanceTiles);

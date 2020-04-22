@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VonoroiView : MonoBehaviour {
+public class MapView : MonoBehaviour {
 
     // Start is called before the first frame update
     void Start() {
@@ -14,7 +14,7 @@ public class VonoroiView : MonoBehaviour {
 
     }
 
-    public void ShowVonoroi(VonoroiModel model) {
+    public void ShowVonoroi(MapModel model) {
         //ShowBorders(model.borderInits);
         ShowTiles(model.tileInits);
     }

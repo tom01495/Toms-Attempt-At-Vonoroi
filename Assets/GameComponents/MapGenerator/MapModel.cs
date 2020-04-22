@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VonoroiModel : MonoBehaviour
-{
+public class MapModel : MonoBehaviour {
     public float xMin = 0;
     public float yMin = 0;
     public float xMax = 1000;
