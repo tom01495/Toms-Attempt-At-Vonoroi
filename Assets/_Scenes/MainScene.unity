@@ -248,5 +248,5 @@ MonoBehaviour:
   xMax: 100
   yMax: 100
   amountTiles: 10
-  minDistanceTiles: 10
+  minDistanceTiles: 5
   minBoundaryLength: 10

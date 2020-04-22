@@ -4,10 +4,24 @@ using UnityEngine;
 
 // THIS NAMESPACE SHOULD ONLY BE USED By THE ALGORITHM!!!
 namespace FortunesAlgoritmGeometry {
-    public class Point : Coordinates, IComparable<Point> {
+    public class Point : IComparable<Point> {
+        protected float valueX;
+        public float x { get { return valueX; } }
+        protected float valueY;
+        public float y { get { return valueY; } }
+        public Vector2 vector { get { return new Vector2(x, y); } }
+
         protected float y_star;
 
-        public Point(float x, float y) : base(x, y) { y_star = y; }
+        public Point(float x, float y) {
+            this.valueX = x;
+            this.valueY = y;
+        }
+
+        public Point(Vector2 v) {
+            valueX = v.x;
+            valueY = v.y;
+        }
 
         public float Dist(Point p) {
             return (float)Math.Sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y));
@@ -18,6 +32,17 @@ namespace FortunesAlgoritmGeometry {
             else if (y_star > p.y_star || (Mathf.Approximately(y_star, p.y_star) && x > p.x)) return 1;
             else return -1;
         }
+
+        // =============================== Overrides
+
+        public override bool Equals(object obj){
+            Point other = obj as Point;
+            if(other != null) { return Mathf.Approximately(other.x,x) && Mathf.Approximately(other.y,y); }
+            return false;
+        }
+
+        public override string ToString() => "(" + valueX.ToString() + "|" + valueY.ToString() + ")";
+        public override int GetHashCode() => base.GetHashCode();
     }
 
     public class Vertex : Point {

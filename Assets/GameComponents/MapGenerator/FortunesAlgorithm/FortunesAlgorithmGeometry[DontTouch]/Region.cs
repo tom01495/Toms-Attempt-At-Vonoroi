@@ -11,9 +11,7 @@ namespace FortunesAlgoritmGeometry
         private Site site;
         public Site Site { get { return site; } }
 
-        public Region(Site p) {
-            site = p;
-        }
+        public Region(Site p) { site = p; }
 
         public static Region InRegion(List<Region> regions, Point p) {
             float minDis = float.MaxValue;

@@ -10,7 +10,6 @@ public class VonoroiModel : MonoBehaviour
     public float yMax = 1000;
     public Rect bounds { get { return Rect.MinMaxRect(xMin, yMin, xMax, yMax); } }
 
-    public int amountTiles = 100; // OLD
     public float minDistanceTiles = 5;
     public float minBoundaryLength = 100; // remember, dont make this too large!
     

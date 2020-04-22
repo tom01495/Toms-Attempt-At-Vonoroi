@@ -9,10 +9,10 @@ public class VonoroiDebugger : MonoBehaviour {
 
     // ================================== Setters
 
-    private static List<Coordinates> SavedCoordinates(VonoroiModel model, bool getNew = false){
-        List<Coordinates> tileCoordinates;
+    private static List<Vector2> SavedCoordinates(VonoroiModel model, bool getNew = false){
+        List<Vector2> tileCoordinates;
         if(getNew) {
-            tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
+            tileCoordinates = PossionDiscSampling.CreateRandomList(model.bounds, model.minDistanceTiles);
 
             int length = tileCoordinates.Count;
             PlayerPrefs.SetInt("length", length);
@@ -21,13 +21,13 @@ public class VonoroiDebugger : MonoBehaviour {
                 PlayerPrefs.SetFloat(index + "y", tileCoordinates[index].y);
             }
         } else {
-            tileCoordinates = new List<Coordinates>();
+            tileCoordinates = new List<Vector2>();
 
             int length = PlayerPrefs.GetInt("length");
             for(int index = 0; index < length; index++) {
                 float x = PlayerPrefs.GetFloat(index + "x");
                 float y = PlayerPrefs.GetFloat(index + "y");
-                tileCoordinates.Add(new Coordinates(x,y));
+                tileCoordinates.Add(new Vector2(x,y));
             }
         }
 

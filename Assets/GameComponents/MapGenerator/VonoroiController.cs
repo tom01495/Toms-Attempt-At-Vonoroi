@@ -15,7 +15,7 @@ public class VonoroiController : MonoBehaviour
     }
 
     private void StartFortunesAlgorithm(VonoroiModel model) {
-        List<Coordinates> tileCoordinates = Coordinates.CreateRandomList(model.bounds, model.minDistanceTiles);
+        List<Vector2> tileCoordinates = PossionDiscSampling.CreateRandomList(model.bounds, model.minDistanceTiles);
         FortunesAlgorithm algorithm = new FortunesAlgorithm(tileCoordinates);
 
         algorithm.RemoveShortBoundaries(model.minBoundaryLength);

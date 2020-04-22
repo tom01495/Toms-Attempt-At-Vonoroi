@@ -8,124 +8,31 @@ using UnityEngine;
 
 public class FortunesAlgorithm {
     private List<Boundary> V;
-    private List<Site> A;
+    private List<Site> S;
 
-    public FortunesAlgorithm(List<Coordinates> siteCoordinates) {
+    public FortunesAlgorithm(List<Vector2> siteCoordinates) {
         V = new List<Boundary>();
-        A = new List<Site>();
-
-        List<Site> S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
+        S = siteCoordinates.ConvertAll<Site>(p => new Site(p.x, p.y));
         S.Sort();
 
-        FortunesPlaneSweepingAlgorithm(S);
+        FortunesPlaneSweepingAlgorithm();
 
-        VonoroiDebugger.ShowBoundaries(V, float.MaxValue); // TODO delete this
+        //VonoroiDebugger.ShowBoundaries(V, float.MaxValue); // TODO delete this
     }
 
-    private void FortunesPlaneSweepingAlgorithm(List<Site> S) {
+    private void FortunesPlaneSweepingAlgorithm() {
         List<Site> initialSites = InitialSites(S);
         List<Point> Q = InitialQ(initialSites, S);
         List<PointSet> T = InitialT(initialSites);
 
-        while(Q.Any()) { FortunesAlgorithmStep(Q, T); }
+        while(Q.Any()) { 
+            Point p = DeleteMax(Q);
+
+            if(typeof(Site).IsInstanceOfType(p)) { SiteEvent((Site)p, Q, T); }
+            else if(typeof(Vertex).IsInstanceOfType(p)) { CircleEvent((Vertex)p, Q, T); }
+        }
 
         foreach(Boundary C in T.OfType<Boundary>()) { AddIfNotInList(V, C.Normal()); }
-    }
-
-    private void FortunesAlgorithmStep(List<Point> Q, List<PointSet> T) {
-        Point p = DeleteMax(Q);
-
-        if(typeof(Site).IsInstanceOfType(p)) { SiteEvent((Site)p, Q, T); }
-        else if(typeof(Vertex).IsInstanceOfType(p)) { CircleEvent((Vertex)p, Q, T); }
-    }
-
-    // ================================== Site Event
-
-    private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
-        Region Rq = Region.InRegion(T.OfType<Region>().ToList(), p);
-        Site q = Rq.Site;
-
-        Boundary Crq = null; //Boundary?
-        Boundary Cqs = null; //Boundary?
-
-        int indexRq = T.FindIndex(r => Rq.Equals(r));
-        if(indexRq > 0) { Crq = T[indexRq-1] as Boundary; }
-        if(indexRq < T.Count - 1) { Cqs = T[indexRq+1] as Boundary; }
-
-        Region Rp = new Region(p);
-        Boundary Cpq = new Boundary(p, q);
-
-        T.RemoveAt(indexRq);
-        List<PointSet> additionT = new List<PointSet>() {Rq.Left(Rp), Cpq.Neg(), Rp, Cpq.Pos(), Rq.Right(Rp)};
-        T.InsertRange(indexRq, additionT);
-
-        if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
-        if(Crq != null) { AddIfNotNull(Q, Crq.Intersection(Cpq.Neg())); }
-        if(Cqs != null) { AddIfNotNull(Q, Cpq.Pos().Intersection(Cqs)); }
-    }
-
-    // ================================== Circle Event
-
-    private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T) {
-        Boundary Cqr = p.LeftBoundary;
-        Boundary Crs = p.RightBoundary;
-        Site q = Cqr.LeftSite;
-        Site s = Crs.RightSite;
-
-        Boundary Cuq = null; //Boundary?
-        Boundary Csv = null; //Boundary?
-
-        int indexCqr = IndexOfBoundary(T, Cqr);
-        if(indexCqr > 1) { Cuq = T[indexCqr-2] as Boundary; }
-        if(indexCqr < T.Count - 4) { Csv = T[indexCqr+4] as Boundary; }
-
-        Boundary Cqs = Boundary.CreateSubtype(q, s);
-
-        T.RemoveRange(indexCqr, 3);
-        T.Insert(indexCqr, Cqs);
-
-        CloseVertex(p, Cqr, Crs, Cqs);
-
-        if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
-        if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
-        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); } // TODO check adding intersection again
-        if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
-    }
-
-    private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
-        for(int index = 0; index < T.Count; index++) {
-            Boundary elem = T[index] as Boundary;
-            if(elem != null && C.Equals(elem)) { return index; }
-        }
-        throw new Exception("Border not found!");
-    }
-
-    private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
-        // TODO remember this moment as the moment a tile got closed and borders made
-        Cqr.Summit = p;
-        Crs.Summit = p;
-        Cqs.Base = p;
-        p.OutgoingBoundary = Cqs;
-
-        AddIfNotInList(V, Cqr.Normal());
-        AddIfNotInList(V, Crs.Normal());
-        A.Add(Cqr.RightSite);
-    }
-
-    // ================================== Additional Functions (as instructed)
-
-    private static Point DeleteMax(List<Point> Q) {
-        Point p = Q.Max();
-        Q.Remove(p);
-        return p;
-    }
-
-    private static void AddIfNotNull<T>(List<T> L, T e) { //T?
-        if(e != null) L.Add(e);
-    }
-
-    private static void AddIfNotInList<T>(List<T> L, T e) {
-        if(!L.Contains(e)) L.Add(e);
     }
 
     // ================================== Initiating Functions
@@ -150,10 +57,101 @@ public class FortunesAlgorithm {
         return T;
     }
 
+    // ================================== Site Event
+
+    private void SiteEvent(Site p, List<Point> Q, List<PointSet> T) {
+        // Step 1: Finding the region above site p
+        Region Rq = Region.InRegion(T.OfType<Region>().ToList(), p);
+        Site q = Rq.Site;
+        Boundary Crq = null; //Boundary?
+        Boundary Cqs = null; //Boundary?
+
+        int indexRq = T.FindIndex(r => Rq.Equals(r));
+        if(indexRq > 0) { Crq = T[indexRq-1] as Boundary; }
+        if(indexRq < T.Count - 1) { Cqs = T[indexRq+1] as Boundary; }
+
+        // Step 2: Creating a new region and inserting it in the beachline under the region above
+        Region Rp = new Region(p);
+        Boundary Cpq = new Boundary(p, q);
+
+        T.RemoveAt(indexRq);
+        List<PointSet> additionT = new List<PointSet>() {Rq.Left(Rp), Cpq.Neg(), Rp, Cpq.Pos(), Rq.Right(Rp)};
+        T.InsertRange(indexRq, additionT);
+
+        // Step 3: Adding and removing (new) intersections in Q
+        if(Crq != null && Cqs != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crq, Cqs, point)); }
+        if(Crq != null) { AddIfNotNull(Q, Crq.Intersection(Cpq.Neg())); }
+        if(Cqs != null) { AddIfNotNull(Q, Cpq.Pos().Intersection(Cqs)); }
+    }
+
+    // ================================== Circle Event
+
+    private void CircleEvent(Vertex p, List<Point> Q, List<PointSet> T) {
+        // Step 1: Finding the intersection of the two boundaries of the intersection
+        Boundary Cqr = p.LeftBoundary;
+        Boundary Crs = p.RightBoundary;
+        Site q = Cqr.LeftSite;
+        Site s = Crs.RightSite;
+        Boundary Cuq = null; //Boundary?
+        Boundary Csv = null; //Boundary?
+
+        int indexCqr = IndexOfBoundary(T, Cqr);
+        if(indexCqr > 1) { Cuq = T[indexCqr-2] as Boundary; }
+        if(indexCqr < T.Count - 4) { Csv = T[indexCqr+4] as Boundary; }
+
+        // Step 2: Creating a new boundary and cover up in the beachline the boundaries and region from which it starts
+        Boundary Cqs = Boundary.CreateSubtype(q, s);
+
+        T.RemoveRange(indexCqr, 3);
+        T.Insert(indexCqr, Cqs);
+
+        CloseVertex(p, Cqr, Crs, Cqs);
+
+        // Step 3: Adding and removing (new) intersections in Q
+        if(Cuq != null) { Q.RemoveAll(point => Boundary.IsIntersection(Cuq, Cqr, point)); }
+        if(Csv != null) { Q.RemoveAll(point => Boundary.IsIntersection(Crs, Csv, point)); }
+        if(Cuq != null) { AddIfNotNull(Q, Cuq.Intersection(Cqs)); } // TODO check adding intersection again
+        if(Csv != null) { AddIfNotNull(Q, Cqs.Intersection(Csv)); }
+    }
+
+    private static int IndexOfBoundary(List<PointSet> T, Boundary C) {
+        for(int index = 0; index < T.Count; index++) {
+            Boundary elem = T[index] as Boundary;
+            if(elem != null && C.Equals(elem)) { return index; }
+        }
+        throw new Exception("Border not found!");
+    }
+
+    private void CloseVertex(Vertex p, Boundary Cqr, Boundary Crs, Boundary Cqs) {
+        Cqr.Summit = p;
+        Crs.Summit = p;
+        Cqs.Base = p;
+        p.OutgoingBoundary = Cqs;
+
+        AddIfNotInList(V, Cqr.Normal());
+        AddIfNotInList(V, Crs.Normal());
+    }
+
+    // ================================== Additional Functions (as instructed)
+
+    private static Point DeleteMax(List<Point> Q) {
+        Point p = Q.Max();
+        Q.Remove(p);
+        return p;
+    }
+
+    private static void AddIfNotNull<T>(List<T> L, T e) { //T?
+        if(e != null) L.Add(e);
+    }
+
+    private static void AddIfNotInList<T>(List<T> L, T e) {
+        if(!L.Contains(e)) L.Add(e);
+    }
+
     // ==================================== Helper Functions (use these before you want result)
 
     public FortunesAlgorithm RemoveShortBoundaries(float minLenght) { // TODO not urgent
-        foreach(Boundary C in V){
+        foreach(Boundary C in V) {
             //if(C.base_.Dist(C.summit) < minLenght) {
                 //V.Remove(C);
             //}
@@ -181,46 +179,55 @@ public class FortunesAlgorithm {
         List<BorderInit> borders = new List<BorderInit>();
         List<TileInit> tiles = new List<TileInit>();
 
+        Dictionary<int, BorderInit> borderDict = new Dictionary<int, BorderInit>();
+        Dictionary<int, TileInit> tileDict = new Dictionary<int, TileInit>();
+
         // Step 1: Setting the borders & tiles
         foreach(Boundary C in V) {
-            borders.Add(C.CreateUnsetBorder());
+            BorderInit border = C.CreateUnsetBorder();
+            if(border != null) {
+                if(!borderDict.ContainsKey(border.GetHashCode())) {
+                    borders.Add(border);
+                    borderDict.Add(border.GetHashCode(), border);
+                }
+            }
         }
-        foreach(Site s in A) {
-            tiles.Add(s.CreateUnsetTile());
+        foreach(Site s in S) {
+            TileInit tile = s.CreateUnsetTile();
+            if(tile != null) {
+                if(!tileDict.ContainsKey(tile.GetHashCode())) {
+                    tiles.Add(tile);
+                    tileDict.Add(tile.GetHashCode(), tile);
+                }
+            }
         }
 
         // Step 2: Correcting the refrences
         foreach(UnsetBorderInit b in borders) {
-            // TileInit leftTile = SearchMatchHash(tiles, b.LeftSite.GetHashCode());
-            // TileInit rightTile = SearchMatchHash(tiles, b.RightSite.GetHashCode());
-            // List<BorderInit> borderBase = SearchMatchesList(borders, b.BaseNeighbours);
-            // List<BorderInit> borderSummit = SearchMatchesList(borders, b.SummitNeighbours);
-
-            // b.SetBorderInit(leftTile, rightTile, borderBase, borderSummit);
+            TileInit leftTile = SearchDict(tileDict, b.LeftSite);
+            TileInit rightTile = SearchDict(tileDict, b.RightSite);
+            List<BorderInit> borderBase = SearchDictList(borderDict, b.BaseNeighbours);
+            List<BorderInit> borderSummit = SearchDictList(borderDict, b.SummitNeighbours);
+            b.SetBorderInit(leftTile, rightTile, borderBase, borderSummit);
         }
         foreach(UnsetTileInit t in tiles) {
-            //List<BorderInit> tileBorders = SearchMatchesList(borders, t.Boundaries);
-
-            //t.SetTileInit(tileBorders);
+            List<BorderInit> tileBorders = SearchDictList(borderDict, t.Boundaries);
+            t.SetTileInit(tileBorders);
         }
 
         return (borders, tiles);
     }
 
-    // TODO improve the lookup times with dictionaries maybe?
-
-    private List<T1> SearchMatchesList<T1, T2>(List<T1> toBeFiltered, List<T2> list) {
+    private List<T1> SearchDictList<T1, T2>(Dictionary<int, T1> dict, List<T2> list) {
         List<T1> output = new List<T1>();
-        foreach(T2 e in list) {
-            T1 match = SearchMatchHash(toBeFiltered, e.GetHashCode());
-            output.Add(match); 
-        }
+        foreach(T2 e in list) output.Add(SearchDict(dict, e));
         return output;
     }
 
-    private T SearchMatchHash<T>(List<T> toBeFiltered, int hash) {
-        foreach(T e in toBeFiltered) { if(e.GetHashCode() == hash) { return e; } }
-        throw new Exception("No match found!");
+    private T1 SearchDict<T1, T2>(Dictionary<int, T1> dict, T2 e) {
+        T1 output;
+        if(dict.TryGetValue(e.GetHashCode(), out output)) return output;
+        else return default(T1);
     }
 }
 
